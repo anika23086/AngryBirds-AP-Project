@@ -49,10 +49,10 @@ public class SuccessScreen implements Screen {
         nextLevelButton = new ImageButton(nextLevelDrawable);
 
         float buttonSpacing = 5f;
-        float centerY = Gdx.graphics.getHeight() / 2f - 150f;
+        float centerY = Gdx.graphics.getHeight() / 2f-150f;
 
         float totalWidth = exitButton.getWidth() + menuButton.getWidth() + nextLevelButton.getWidth() + 2 * buttonSpacing;
-        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2f;
+        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2f-50f;
 
         exitButton.setPosition(startX, centerY);
         menuButton.setPosition(startX + exitButton.getWidth() + buttonSpacing, centerY);

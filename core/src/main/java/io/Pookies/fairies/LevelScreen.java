@@ -50,13 +50,13 @@ public class LevelScreen implements Screen {
         level2Button = new ImageButton(new TextureRegionDrawable(level2Region));
 
         level1Button.setPosition(
-            Gdx.graphics.getWidth() / 3f - level1Button.getWidth() / 3f - 300,
-            Gdx.graphics.getHeight() / 3f + 250f
+            Gdx.graphics.getWidth() / 3f - level1Button.getWidth() / 3f - 390,
+            Gdx.graphics.getHeight() / 3f + 300f
         );
 
         level2Button.setPosition(
-            Gdx.graphics.getWidth() / 3f - level2Button.getWidth() / 3f,
-            Gdx.graphics.getHeight() / 3f + 250f
+            Gdx.graphics.getWidth() / 3f - level2Button.getWidth() / 3f+10f,
+            Gdx.graphics.getHeight() / 3f + 315f
         );
 
         exitButton.setPosition(

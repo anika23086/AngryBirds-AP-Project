@@ -48,11 +48,11 @@ public class FailureScreen implements Screen {
         menuButton = new ImageButton(menuDrawable);
         retryButton = new ImageButton(retryDrawable);
 
-        float buttonSpacing = 10f; // Space between buttons
-        float centerY = Gdx.graphics.getHeight() / 2f - 150f; // Move down by 150 pixels
+        float buttonSpacing = 10f;
+        float centerY = Gdx.graphics.getHeight() / 2f - 150f;
 
         float totalWidth = exitButton.getWidth() + menuButton.getWidth() + retryButton.getWidth() + 2 * buttonSpacing;
-        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2f - 45f; // Center buttons horizontally
+        float startX = (Gdx.graphics.getWidth() - totalWidth) / 2f - 45f;
 
         exitButton.setPosition(startX, centerY);
         menuButton.setPosition(startX + exitButton.getWidth() + buttonSpacing, centerY);
@@ -61,7 +61,7 @@ public class FailureScreen implements Screen {
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ((Main) game).clickSound.play(((Main) game).clickSoundVolume); // Play click sound
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
                 Gdx.app.exit(); // Exit the game
             }
         });
@@ -69,18 +69,18 @@ public class FailureScreen implements Screen {
         menuButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ((Main) game).clickSound.play(((Main) game).clickSoundVolume); // Play click sound
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
                 System.out.println("Menu button clicked!");
-                game.setScreen(new LevelScreen(game)); // Change to LevelScreen
+                game.setScreen(new LevelScreen(game));
             }
         });
 
         retryButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                ((Main) game).clickSound.play(((Main) game).clickSoundVolume); // Play click sound
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
                 System.out.println("Retry button clicked!");
-                game.setScreen(new LevelScreen_1(game)); // Change to LevelScreen_1 to retry the level
+                game.setScreen(new LevelScreen_1(game));
             }
         });
     }

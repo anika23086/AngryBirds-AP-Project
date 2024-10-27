@@ -43,7 +43,7 @@ public class OpeningPage implements Screen {
         playButton = new ImageButton(playButtonDrawable, playButtonPressedDrawable);
         playButton.setPosition(
             Gdx.graphics.getWidth() / 2f - playButton.getWidth() / 2f,
-            Gdx.graphics.getHeight() / 2f - playButton.getHeight() / 2f - 350f
+            Gdx.graphics.getHeight() / 2f - playButton.getHeight() / 2f-465f
         );
 
         playButton.addListener(new ClickListener() {

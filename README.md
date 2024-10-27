@@ -31,3 +31,26 @@ Useful Gradle tasks and flags:
 
 Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
 For example, `core:clean` removes `build` folder only from the `core` project.
+
+# HOW TO RUN THE PROGRAM
+To be able to run the program, open the Lwjgl3Launcher class, which can be found in the lwjgl3 folder, within src -> main -> java -> io.Pookies.fairies.lwjgl3.
+When the program will be run, the main screen will appear, where the user has to click on the 'Play' button to move to the levels screen. 
+In the levels screen, only the first level will be unlocked, which when clicked will take the user to the Level 1 screen. In that screen, 
+since the game functionalities haven't been programmed yet, the user will see 2 buttons, 'Success!' and 'Failure!', which can be clicked to view
+the success and failure screens. In the success screen menu, the user will have the option to exit the game, return to the levels screen, or directly move
+on to the next level. Based on what the user chooses, they will be directed to that respective page. Similarly, in the failure screen menu, the user will have 
+the option to exit the game, return to the levels screen, or retry the level. Based on their choice, they will be directed to that screen accordingly.
+Furthermore, in all the level screens, on the top right corner there will be a pause button, which when clicked will take the user to pause menu, where the user 
+will have the choice to continue the game where they left off, restart, go back to the levels screen, or exit the game entirely. Again, based on their choice, 
+the user will get directed to that page. By doing this, the program can be tested and ensured that all the screens and the transitions between them through the
+use of buttons are working properly or not. 
+
+# ONLINE REFERENCES
+https://angrybirds.fandom.com/wiki/Stone
+https://angrybirds.fandom.com/wiki/Minion_Pigs/Angryverse/Angry_Birds_Space
+https://ar.pinterest.com/pin/955748352143825885/
+https://angrybirds.fandom.com/wiki/Star
+https://www.pikpng.com/transpng/TmRhhJ/
+https://www.youtube.com/watch?v=NuZM5_4xjrU
+https://www.spriters-resource.com/mobile/angrybirdspace/sheet/166300/
+

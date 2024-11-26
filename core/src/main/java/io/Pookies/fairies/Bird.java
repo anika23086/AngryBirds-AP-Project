@@ -14,7 +14,7 @@ public class Bird {
     protected Vector2 slingshotPosition;
     protected boolean isDragging;
     protected boolean isLaunched;
-    protected static final float GRAVITY = -9.8f * 60; // Gravity scaled for game units
+    protected static final float GRAVITY = 980f; // Gravity scaled for game units
     protected static final float LAUNCH_SPEED_MULTIPLIER = 8f;
     protected static final float MAX_PULL_DISTANCE = 150f;
     protected float launchAngle;
@@ -32,63 +32,31 @@ public class Bird {
         this.pullDistance = 0;
     }
 
-    public void update(float delta) {
-        if (isLaunched) {
-            // Apply gravity and update position
-            velocity.y += GRAVITY * delta;
-            position.x += velocity.x * delta;
-            position.y += velocity.y * delta;
-
-            // Optional: Reset bird if it goes off screen
-            if (position.y < 0 || position.x > Gdx.graphics.getWidth()) {
-                reset();
-            }
-        }
-    }
 
     public void render(SpriteBatch batch) {
         batch.draw(texture, position.x, position.y);
     }
 
+
+
     public void startDragging() {
-        if (!isLaunched) {
-            isDragging = true;
-        }
+        isDragging = true;
+        velocity.set(0, 0);
+        isLaunched = false;
     }
 
     public void drag(float x, float y) {
-        if (isDragging && !isLaunched) {
-            // Calculate angle between slingshot center and touch position
-            float dx = x - slingshotPosition.x - x;
-            float dy = y - slingshotPosition.y - y;
-            launchAngle = MathUtils.atan2(dy, dx);
-
-            // Calculate pull distance
-            pullDistance = Math.min(
-                new Vector2(dx, dy).len(),
-                MAX_PULL_DISTANCE
-            );
-
-            // Calculate new position based on angle and pull distance
-            float newX = slingshotPosition.x - pullDistance * MathUtils.cos(launchAngle);
-            float newY = slingshotPosition.y - pullDistance * MathUtils.sin(launchAngle);
-
-            position.set(newX, newY);
+        if (isDragging) {
+            position.set(x, y);
         }
     }
 
-    public void launch() {
-        if (isDragging && !isLaunched) {
-            float launchSpeed = pullDistance * LAUNCH_SPEED_MULTIPLIER;
-            float launchVelocityX = -launchSpeed * MathUtils.cos(launchAngle);
-            float launchVelocityY = -launchSpeed * MathUtils.sin(launchAngle);
-
-            velocity.set(launchVelocityX, launchVelocityY);
-
-            isDragging = false;
-            isLaunched = true;
-        }
+    public void launch(float velocityX, float velocityY) {
+        isDragging = false;
+        isLaunched = true;
+        velocity.set(velocityX, velocityY);
     }
+
 
     public void reset() {
         position.set(originalPosition);
@@ -98,16 +66,27 @@ public class Bird {
         launchAngle = 0;
         pullDistance = 0;
     }
+    public void update(float delta) {
+        if (isLaunched) {
+            // Apply gravity
+            velocity.y -= GRAVITY * delta;
+
+            // Update position
+            position.x += velocity.x * delta;
+            position.y += velocity.y * delta;
+        }
+    }
 
     public boolean contains(float x, float y) {
-        float birdCenterX = position.x + texture.getWidth() / 2;
-        float birdCenterY = position.y + texture.getHeight() / 2;
-        float touchRadius = Math.max(texture.getWidth(), texture.getHeight()) / 2;
-
-        return new Vector2(x - birdCenterX, y - birdCenterY).len() <= touchRadius;
+        return x >= position.x && x <= position.x + texture.getWidth() &&
+            y >= position.y && y <= position.y + texture.getHeight();
     }
 
     public void dispose() {
-        texture.dispose();
+        if (texture != null) texture.dispose();
+    }
+
+    public Vector2 getPosition() {
+        return position;
     }
 }

@@ -36,13 +36,13 @@ public class LevelScreen_2 implements Screen {
         this.game = game;
         batch = new SpriteBatch();
         purplebird = new PurpleBird(30, 80, world);
-        bubblePig1 = new BubblePig(885, 380, world);
-        bubblePig2 = new BubblePig(1130, 275, world);
+        bubblePig1 = new BubblePig(world, "bubblepig.png",885, 380);
+        bubblePig2 = new BubblePig(world, "bubblepig.png",1130, 275);
         stoneStructure1 = new StoneStructure(1015, 380, world);
         stoneStructure2 = new StoneStructure(1130, 150, world);
         stoneStructure3 = new StoneStructure(1015, 150, world);
         stoneStructure4 = new StoneStructure(900, 150, world);
-        slingshot = new Slingshot(30,80);
+        slingshot = new Slingshot(world,30, 80);
     }
 
     @Override

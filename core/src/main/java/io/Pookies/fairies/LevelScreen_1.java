@@ -6,6 +6,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -19,24 +22,22 @@ public class LevelScreen_1 implements Screen {
     private SpriteBatch batch;
     private Texture levelBackground;
     private Texture pauseButtonTexture;
-    private Texture successButtonTexture;
-    private Texture failureButtonTexture;
     private ImageButton pauseButton;
-    private ImageButton successButton;
-    private ImageButton failureButton;
     private PinkBird pinkBird;
     private BubblePig bubblePig;
     private StoneStructure stoneStructure;
     private Slingshot slingshot;
     private float clickSoundVolume;
+    private World world;
 
     public LevelScreen_1(Game game) {
+        world = new World(new Vector2(0, -9.8f), true);
         this.game = game;
         batch = new SpriteBatch();
-        pinkBird = new PinkBird(30, 80);
-        bubblePig = new BubblePig(1090, 340);
-        stoneStructure = new StoneStructure(1100, 100);
-        slingshot = new Slingshot(220, 130);
+        pinkBird = new PinkBird(30, 80, world);
+        bubblePig = new BubblePig(1090, 340, world);
+        stoneStructure = new StoneStructure(1100, 100, world);
+        slingshot = new Slingshot(30,80);
         clickSoundVolume = ((Main) game).clickSoundVolume;
     }
 
@@ -59,34 +60,7 @@ public class LevelScreen_1 implements Screen {
             }
         });
 
-        successButtonTexture = new Texture(Gdx.files.internal("success_button.png"));
-        TextureRegionDrawable successDrawable = new TextureRegionDrawable(successButtonTexture);
-        successButton = new ImageButton(successDrawable);
-        successButton.setPosition(Gdx.graphics.getWidth() / 2f - successButton.getWidth() / 2f, Gdx.graphics.getHeight() / 2f + 50f);
-        successButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ((Main) game).clickSound.play(clickSoundVolume);
-                LevelScreen.level1Completed = true;
-                game.setScreen(new SuccessScreen(game));
-            }
-        });
-
-        failureButtonTexture = new Texture(Gdx.files.internal("failure_button.png"));
-        TextureRegionDrawable failureDrawable = new TextureRegionDrawable(failureButtonTexture);
-        failureButton = new ImageButton(failureDrawable);
-        failureButton.setPosition(Gdx.graphics.getWidth() / 2f - failureButton.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - 50f);
-        failureButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ((Main) game).clickSound.play(clickSoundVolume);
-                game.setScreen(new FailureScreen(game));
-            }
-        });
-
         stage.addActor(pauseButton);
-        stage.addActor(successButton);
-        stage.addActor(failureButton);
     }
 
     @Override
@@ -127,8 +101,6 @@ public class LevelScreen_1 implements Screen {
         if (batch != null) batch.dispose();
         if (levelBackground != null) levelBackground.dispose();
         if (pauseButtonTexture != null) pauseButtonTexture.dispose();
-        if (successButtonTexture != null) successButtonTexture.dispose();
-        if (failureButtonTexture != null) failureButtonTexture.dispose();
         if (pinkBird != null) pinkBird.dispose();
         if (bubblePig != null) bubblePig.dispose();
         if (stoneStructure != null) stoneStructure.dispose();

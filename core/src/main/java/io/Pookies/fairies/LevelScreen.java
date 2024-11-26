@@ -72,6 +72,14 @@ public class LevelScreen implements Screen {
             }
         });
 
+        level1Button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+                game.setScreen(new GameScreen());
+            }
+        });
+
         level2Button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -99,6 +107,9 @@ public class LevelScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        if (level1Completed) {
+            game.setScreen(new LevelScreen_1(game));
+        }
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

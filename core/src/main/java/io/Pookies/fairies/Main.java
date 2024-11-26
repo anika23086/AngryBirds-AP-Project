@@ -5,18 +5,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.physics.box2d.Box2D;
 
 public class Main extends Game {
     public SpriteBatch batch;
     private Music backgroundMusic;
     public Sound clickSound;
     public float clickSoundVolume = 1.0f;
-    public static final float PPM = 100f;
 
     @Override
-    public void create(){
-        Box2D.init();
+    public void create() {
         batch = new SpriteBatch();
         clickSound = Gdx.audio.newSound(Gdx.files.internal("click.mp3"));
         setScreen(new OpeningPage(this));
@@ -32,14 +29,5 @@ public class Main extends Game {
         batch.dispose();
         backgroundMusic.dispose();
         clickSound.dispose();
-        getScreen().dispose();
-    }
-
-    public static float toMeters(float pixels){
-        return pixels / PPM;
-    }
-
-    public static float toPixels(float meters){
-        return meters * PPM;
     }
 }

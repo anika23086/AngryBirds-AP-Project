@@ -6,8 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -27,22 +25,18 @@ public class LevelScreen_2 implements Screen {
     private BubblePig bubblePig1, bubblePig2;
     private StoneStructure stoneStructure1, stoneStructure2, stoneStructure3, stoneStructure4;
     private Slingshot slingshot;
-    private World world;
-    private Body body;
-
-
 
     public LevelScreen_2(Game game) {
         this.game = game;
         batch = new SpriteBatch();
-        purplebird = new PurpleBird(30, 80, world);
-        bubblePig1 = new BubblePig(world, "bubblepig.png",885, 380);
-        bubblePig2 = new BubblePig(world, "bubblepig.png",1130, 275);
-        stoneStructure1 = new StoneStructure(1015, 380, world);
-        stoneStructure2 = new StoneStructure(1130, 150, world);
-        stoneStructure3 = new StoneStructure(1015, 150, world);
-        stoneStructure4 = new StoneStructure(900, 150, world);
-        slingshot = new Slingshot(world,30, 80);
+        purplebird = new PurpleBird(30, 80);
+        bubblePig1 = new BubblePig(885, 380);
+        bubblePig2 = new BubblePig(1130, 275);
+        stoneStructure1 = new StoneStructure(1015, 380);
+        stoneStructure2 = new StoneStructure(1130, 150);
+        stoneStructure3 = new StoneStructure(1015, 150);
+        stoneStructure4 = new StoneStructure(900, 150);
+        slingshot = new Slingshot(220, 130);
     }
 
     @Override

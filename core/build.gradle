@@ -6,10 +6,25 @@ repositories {
   mavenCentral()
 }
 
+ext {
+  gdxVersion = "1.11.0"         // Replace with your GDX version
+  visUiVersion = "1.5.1"        // Replace with the desired VisUI version
+  graalHelperVersion = "1.0.0"  // Example version if using Graal Native
+}
+
 dependencies {
+  // Core dependencies
+  api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
+  api "com.kotcrab.vis:vis-ui:$visUiVersion"
   implementation "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
 
+  // Desktop dependencies
+  implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"
+  implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
+  implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
+
+  // Optional: Graal Native support
   if (enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }

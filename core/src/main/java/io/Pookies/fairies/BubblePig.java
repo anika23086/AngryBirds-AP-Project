@@ -4,8 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class BubblePig extends Pig {
-    private Texture bubbleTexture;
-
     public BubblePig(float x, float y) {
-        super("bubblepig.png", x, y); // Use specific texture for BubblePig
-    }}
+        super("bubblepig.png", x, y);
+    }
+}

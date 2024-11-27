@@ -8,4 +8,8 @@ public class PinkBird extends Bird {
     public PinkBird(float x, float y) {
         super("pinkbird.png", x, y);
     }
+
+    public Vector2 getVelocity() {
+        return new Vector2(0, 0);
+    }
 }

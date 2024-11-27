@@ -5,8 +5,10 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -36,12 +38,31 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private float launchAngle;
     private ShapeRenderer shapeRenderer;
     private boolean showTrajectory;
+    private boolean pigDestroyed = false;
+    private boolean structureDestroyed = false;
+    private boolean birdDestroyed = false;
+    private Rectangle birdRectangle;
+    private Rectangle pigRectangle;
+    private Rectangle structureRectangle;
+    private BitmapFont scoreFont;
+    private int currentScore;
+    private static final int PIG_POINTS = 200;
+    private static final int STRUCTURE_POINTS = 100;
+    private boolean levelComplete = false;
+    private float levelCompleteTimer = 0;
+    private static final float LEVEL_COMPLETE_DELAY = 1.0f;
+    private boolean checkingForFailure = false;
+    private float failureCheckTimer = 0;
+    private static final float FAILURE_CHECK_DELAY = 2.0f; // Time to wait before checking for failure
+    private static final float VELOCITY_THRESHOLD = 1.0f; // Minimum velocity to consider the bird still moving
+    private static final float SCREEN_BOUNDS_MARGIN = 100f;
+    private boolean isErrorHandlerSet = false;
 
     public LevelScreen_1(Game game) {
         this.game = game;
         batch = new SpriteBatch();
         pinkBird = new PinkBird(120, 200);
-        bubblePig = new BubblePig(1090, 340);
+        bubblePig = new BubblePig(1090, 250);
         stoneStructure = new StoneStructure(1100, 100);
         slingshot = new Slingshot(220, 130);
         clickSoundVolume = ((Main) game).clickSoundVolume;
@@ -49,7 +70,27 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         slingshotOrigin = new Vector2(220, 130);
         shapeRenderer = new ShapeRenderer();
         showTrajectory = false;
+        birdRectangle = new Rectangle(120, 200, 50, 50); // Use approximate sizes
+        pigRectangle = new Rectangle(1090, 340, 50, 50);
+        structureRectangle = new Rectangle(1100, 100, 100, 200);
+        scoreFont = new BitmapFont();
+        scoreFont.setColor(Color.YELLOW);
+        scoreFont.getData().setScale(3.0f); // Make the font larger
+        currentScore = 0;
+        checkingForFailure = false;
+        failureCheckTimer = 0;
+        setupErrorHandler();
+    }
 
+    private void setupErrorHandler() {
+        if (!isErrorHandlerSet) {
+            Thread.setDefaultUncaughtExceptionHandler(new NativeCrashHandler(game));
+
+            Gdx.app.setLogLevel(Application.LOG_DEBUG);
+            Gdx.app.error("LevelScreen_1", "Setting up error handler");
+
+            isErrorHandlerSet = true;
+        }
     }
 
     @Override
@@ -80,32 +121,166 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        try{
+            Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        stage.act(delta);
-        stage.draw();
+            if (levelComplete) {
+                levelCompleteTimer += delta;
+                if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
+                    game.setScreen(new SuccessScreen(game));
+                    return;
+                }
+            }
 
+            if (gameStarted && !levelComplete && !checkingForFailure) {
+                checkingForFailure = true;
+            }
 
-        if (gameStarted) {
-            pinkBird.update(delta);
+            if (checkingForFailure && !pigDestroyed) {
+                checkForFailureConditions(delta);
+            }
+
+            stage.act(delta);
+            stage.draw();
+
+            if (gameStarted && !birdDestroyed) {
+                pinkBird.update(delta);
+                birdRectangle.setPosition(pinkBird.getPosition().x, pinkBird.getPosition().y);
+                checkCollisions();
+            }
+
+            batch.begin();
+            batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+            if (!birdDestroyed) {
+                pinkBird.render(batch);
+            }
+            if (!pigDestroyed) {
+                bubblePig.render(batch);
+            }
+            if (!structureDestroyed) {
+                stoneStructure.render(batch);
+            }
+            slingshot.render(batch);
+            scoreFont.draw(batch, "Score: " + currentScore, 1700, Gdx.graphics.getHeight() - 20);
+
+            batch.end();
+
+            if (showTrajectory && dragStart != null) {
+                renderTrajectoryPreview();
+            }
+        } catch (Throwable t) {
+            handleCrash(t);
         }
-
-        batch.begin();
-        batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        pinkBird.render(batch);
-        bubblePig.render(batch);
-        stoneStructure.render(batch);
-        slingshot.render(batch);
-        batch.end();
-
-
-        // Draw trajectory preview
-        if (showTrajectory && dragStart != null) {
-            renderTrajectoryPreview();
-        }
-
-
     }
+
+    private void updateBirdPosition(float delta) {
+        try {
+            pinkBird.update(delta);
+            birdRectangle.setPosition(pinkBird.getPosition().x, pinkBird.getPosition().y);
+            checkCollisions();
+        } catch (Throwable t) {
+            handleCrash(t);
+        }
+    }
+
+    private void renderGameElements() {
+        try {
+            batch.begin();
+            batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+            if (!birdDestroyed) {
+                pinkBird.render(batch);
+            }
+            if (!pigDestroyed) {
+                bubblePig.render(batch);
+            }
+            if (!structureDestroyed) {
+                stoneStructure.render(batch);
+            }
+            slingshot.render(batch);
+            scoreFont.draw(batch, "Score: " + currentScore, 1700, Gdx.graphics.getHeight() - 20);
+
+            batch.end();
+        } catch (Throwable t) {
+            if (batch != null && batch.isDrawing()) {
+                batch.end();
+            }
+            handleCrash(t);
+        }
+    }
+
+    private void handleCrash(Throwable throwable) {
+        Gdx.app.error("LevelScreen_1", "Crash detected", throwable);
+        try {
+            // Ensure we're on the main thread when switching screens
+            Gdx.app.postRunnable(() -> {
+                try {
+                    dispose(); // Clean up resources
+                    game.setScreen(new FailureScreen(game));
+                } catch (Exception e) {
+                    Gdx.app.error("LevelScreen_1", "Failed to show failure screen", e);
+                    Gdx.app.exit();
+                }
+            });
+        } catch (Exception e) {
+            Gdx.app.error("LevelScreen_1", "Failed to handle crash", e);
+            Gdx.app.exit();
+        }
+    }
+
+    private void checkForFailureConditions(float delta) {
+        failureCheckTimer += delta;
+
+        if (failureCheckTimer >= FAILURE_CHECK_DELAY) {
+            // Check if bird is off screen
+            Vector2 birdPos = pinkBird.getPosition();
+            boolean isOffScreen = birdPos.x < -SCREEN_BOUNDS_MARGIN ||
+                birdPos.x > Gdx.graphics.getWidth() + SCREEN_BOUNDS_MARGIN ||
+                birdPos.y < -SCREEN_BOUNDS_MARGIN ||
+                birdPos.y > Gdx.graphics.getHeight() + SCREEN_BOUNDS_MARGIN;
+
+            // Check if bird has stopped moving (get velocity from your PinkBird class)
+            Vector2 birdVelocity = pinkBird.getVelocity();
+            boolean hasStopped = birdVelocity.len() < VELOCITY_THRESHOLD;
+
+            // If bird is off screen or has stopped without hitting the pig, transition to failure screen
+            if ((isOffScreen || hasStopped) && !pigDestroyed) {
+                game.setScreen(new FailureScreen(game));
+            }
+        }
+    }
+
+    private void checkCollisions() {
+        if (!pigDestroyed && birdRectangle.overlaps(pigRectangle)) {
+            handlePigCollision();
+        }
+
+        if (!structureDestroyed && birdRectangle.overlaps(structureRectangle)) {
+            handleStructureCollision();
+        }
+    }
+
+    private void handlePigCollision() {
+        if (!pigDestroyed) {  // Check to prevent multiple score additions
+            pigDestroyed = true;
+            birdDestroyed = true;
+            currentScore += PIG_POINTS;
+            System.out.println("Pig hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+
+            levelComplete = true;
+        }
+    }
+
+    private void handleStructureCollision() {
+        if (!structureDestroyed) {  // Check to prevent multiple score additions
+            structureDestroyed = true;
+            birdDestroyed = true;
+            currentScore += STRUCTURE_POINTS;
+            System.out.println("Structure hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+        }
+    }
+
 
     private void renderTrajectoryPreview() {
         // Prepare ShapeRenderer for drawing
@@ -242,13 +417,18 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
     @Override
     public void dispose() {
-        if (stage != null) stage.dispose();
-        if (batch != null) batch.dispose();
-        if (levelBackground != null) levelBackground.dispose();
-        if (pauseButtonTexture != null) pauseButtonTexture.dispose();
-        if (pinkBird != null) pinkBird.dispose();
-        if (bubblePig != null) bubblePig.dispose();
-        if (stoneStructure != null) stoneStructure.dispose();
-        if (shapeRenderer != null) shapeRenderer.dispose();
+        try {
+            if (stage != null) stage.dispose();
+            if (batch != null) batch.dispose();
+            if (levelBackground != null) levelBackground.dispose();
+            if (pauseButtonTexture != null) pauseButtonTexture.dispose();
+            if (pinkBird != null) pinkBird.dispose();
+            if (bubblePig != null) bubblePig.dispose();
+            if (stoneStructure != null) stoneStructure.dispose();
+            if (shapeRenderer != null) shapeRenderer.dispose();
+            if (scoreFont != null) scoreFont.dispose();
+        } catch (Exception e) {
+            Gdx.app.error("LevelScreen_1", "Error during disposal", e);
+        }
     }
 }

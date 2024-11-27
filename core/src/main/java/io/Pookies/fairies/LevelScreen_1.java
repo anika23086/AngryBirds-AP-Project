@@ -27,7 +27,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private ImageButton pauseButton;
     private PinkBird pinkBird;
     private BubblePig bubblePig;
-    private StoneStructure stoneStructure;
+    private StoneStructure stoneStructure1, stoneStructure2;
     private Slingshot slingshot;
     private float clickSoundVolume;
     private boolean gameStarted;
@@ -62,8 +62,9 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         this.game = game;
         batch = new SpriteBatch();
         pinkBird = new PinkBird(120, 200);
-        bubblePig = new BubblePig(1090, 250);
-        stoneStructure = new StoneStructure(1100, 100);
+        bubblePig = new BubblePig(1090, 560);
+        stoneStructure1 = new StoneStructure(1100, 100);
+        stoneStructure2= new StoneStructure(1100, 320);
         slingshot = new Slingshot(220, 130);
         clickSoundVolume = ((Main) game).clickSoundVolume;
         gameStarted = false;
@@ -71,7 +72,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         shapeRenderer = new ShapeRenderer();
         showTrajectory = false;
         birdRectangle = new Rectangle(120, 200, 50, 50); // Use approximate sizes
-        pigRectangle = new Rectangle(1090, 340, 50, 50);
+        pigRectangle = new Rectangle(1090, 560, 50, 50);
         structureRectangle = new Rectangle(1100, 100, 100, 200);
         scoreFont = new BitmapFont();
         scoreFont.setColor(Color.YELLOW);
@@ -121,10 +122,18 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
     @Override
     public void render(float delta) {
-        try{
+        try {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
             if (levelComplete) {
+                levelCompleteTimer += delta;
+                if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
+                    game.setScreen(new SuccessScreen(game));
+                    return;
+                }
+            }
+
+            if (pigDestroyed && structureDestroyed) {
                 levelCompleteTimer += delta;
                 if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
                     game.setScreen(new SuccessScreen(game));
@@ -140,14 +149,25 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 checkForFailureConditions(delta);
             }
 
-            stage.act(delta);
-            stage.draw();
+            if (gameStarted && !pigDestroyed) {
+                // Update pig's position and check for falling
+                bubblePig.update(delta);
+                pigRectangle.setPosition(bubblePig.getPosition().x, bubblePig.getPosition().y);
+
+                // Check if pig has fallen off screen
+                if (bubblePig.getPosition().y < -100) { // Adjust threshold as needed
+                    pigDestroyed = true;
+                }
+            }
 
             if (gameStarted && !birdDestroyed) {
                 pinkBird.update(delta);
                 birdRectangle.setPosition(pinkBird.getPosition().x, pinkBird.getPosition().y);
                 checkCollisions();
             }
+
+            stage.act(delta);
+            stage.draw();
 
             batch.begin();
             batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -159,16 +179,18 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 bubblePig.render(batch);
             }
             if (!structureDestroyed) {
-                stoneStructure.render(batch);
+                stoneStructure1.render(batch);
+                stoneStructure2.render(batch);
             }
             slingshot.render(batch);
             scoreFont.draw(batch, "Score: " + currentScore, 1700, Gdx.graphics.getHeight() - 20);
 
-            batch.end();
-
             if (showTrajectory && dragStart != null) {
                 renderTrajectoryPreview();
             }
+
+            batch.end();
+
         } catch (Throwable t) {
             handleCrash(t);
         }
@@ -196,7 +218,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 bubblePig.render(batch);
             }
             if (!structureDestroyed) {
-                stoneStructure.render(batch);
+                stoneStructure1.render(batch);
+                stoneStructure2.render(batch);
             }
             slingshot.render(batch);
             scoreFont.draw(batch, "Score: " + currentScore, 1700, Gdx.graphics.getHeight() - 20);
@@ -392,6 +415,58 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         return false;
     }
 
+    private void checkPigsOnDestroyedStructures() {
+        if (structureDestroyed) {
+            // Check if the pig is on or very close to the structure
+            Rectangle structureRect1 = new Rectangle(1100, 100, 100, 200);
+            Rectangle structureRect2 = new Rectangle(1100, 320, 100, 200);
+
+            // Check for Pig on Structure 1
+            if (!pigDestroyed && isPigDirectlyAboveStructure(structureRect1)) {
+                handlePigFall();
+            }
+
+            if (!pigDestroyed && isPigDirectlyAboveStructure(structureRect2)) {
+                handlePigFall();}
+        }
+    }
+
+    private boolean isOverlapping(Rectangle pigRect, Rectangle structureRect) {
+        // Check if pig is sitting on top of or within the structure
+        return pigRect.x >= structureRect.x &&
+            pigRect.x <= structureRect.x + structureRect.width &&
+            pigRect.y >= structureRect.y &&
+            pigRect.y <= structureRect.y + structureRect.height;
+    }
+
+    private void handlePigFall() {
+        if (!pigDestroyed) {
+            // Add falling mechanism
+            bubblePig.startFalling(); // Assuming you'll add this method to BubblePig class
+
+            // Award points for pig falling
+            pigDestroyed = true;
+            currentScore += PIG_POINTS;
+            System.out.println("Pig fell! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+        }
+    }
+
+    private boolean isPigDirectlyAboveStructure(Rectangle structureRect) {
+        // Check if pig's x-coordinate is within the width of the structure
+        boolean withinStructureWidth =
+            pigRectangle.x >= structureRect.x &&
+                pigRectangle.x <= structureRect.x + structureRect.width;
+
+        // Check if pig is directly above the structure
+        // (y position of pig is just above the top of the structure)
+        boolean directlyAbove =
+            pigRectangle.y >= structureRect.y + structureRect.height &&
+                pigRectangle.y <= structureRect.y + structureRect.height + 100; // Allow some vertical tolerance
+
+        return withinStructureWidth && directlyAbove;
+    }
+
+
     // Implement other InputProcessor methods (return false)
     @Override public boolean keyDown(int keycode) { return false; }
     @Override public boolean keyUp(int keycode) { return false; }
@@ -424,7 +499,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (pauseButtonTexture != null) pauseButtonTexture.dispose();
             if (pinkBird != null) pinkBird.dispose();
             if (bubblePig != null) bubblePig.dispose();
-            if (stoneStructure != null) stoneStructure.dispose();
+            if (stoneStructure1 != null) stoneStructure1.dispose();
+            if (stoneStructure2 != null) stoneStructure2.dispose();
             if (shapeRenderer != null) shapeRenderer.dispose();
             if (scoreFont != null) scoreFont.dispose();
         } catch (Exception e) {

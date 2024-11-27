@@ -28,7 +28,7 @@ public class LevelScreen_2 implements Screen {
 
     public LevelScreen_2(Game game) {
         this.game = game;
-        batch = new SpriteBatch();
+        batch = new SpriteBatch(); //BAAAAAAAA
         purplebird = new PurpleBird(30, 80);
         bubblePig1 = new BubblePig(885, 380);
         bubblePig2 = new BubblePig(1130, 275);

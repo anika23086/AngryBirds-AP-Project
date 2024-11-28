@@ -53,8 +53,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private static final float LEVEL_COMPLETE_DELAY = 1.0f;
     private boolean checkingForFailure = false;
     private float failureCheckTimer = 0;
-    private static final float FAILURE_CHECK_DELAY = 2.0f; // Time to wait before checking for failure
-    private static final float VELOCITY_THRESHOLD = 1.0f; // Minimum velocity to consider the bird still moving
+    private static final float FAILURE_CHECK_DELAY = 2.0f;
+    private static final float VELOCITY_THRESHOLD = 1.0f;
     private static final float SCREEN_BOUNDS_MARGIN = 100f;
     private boolean isErrorHandlerSet = false;
 

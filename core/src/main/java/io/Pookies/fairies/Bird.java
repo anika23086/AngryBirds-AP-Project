@@ -89,4 +89,8 @@ public class Bird {
     public Vector2 getPosition() {
         return position;
     }
+
+    public Vector2 getVelocity() {
+        return velocity;
+    }
 }

@@ -31,7 +31,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private boolean gameStarted;
     private Vector2 slingshotOrigin;
     private Vector2 dragStart;
-    private float maxDragDistance = 600f; // Maximum distance bird can be pulled back
+    private float maxDragDistance = 600f;
     private float launchPower;
     private float launchAngle;
     private ShapeRenderer shapeRenderer;

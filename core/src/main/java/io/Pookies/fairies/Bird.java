@@ -6,7 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
-public class Bird {
+public abstract class Bird {
     protected Texture texture;
     protected Vector2 position;
     protected Vector2 velocity;
@@ -93,4 +93,6 @@ public class Bird {
     public Vector2 getVelocity() {
         return velocity;
     }
+
+    public abstract int getStrengthAgainst(String material);
 }

@@ -12,4 +12,9 @@ public class PinkBird extends Bird {
     public Vector2 getVelocity() {
         return new Vector2(0, 0);
     }
+
+    @Override
+    public int getStrengthAgainst(String material) {
+        return 1;
+    }
 }

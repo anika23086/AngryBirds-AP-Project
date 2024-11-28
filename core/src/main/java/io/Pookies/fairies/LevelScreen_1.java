@@ -57,6 +57,11 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private static final float VELOCITY_THRESHOLD = 1.0f;
     private static final float SCREEN_BOUNDS_MARGIN = 100f;
     private boolean isErrorHandlerSet = false;
+    private Texture sparkleTexture;        // Sparkle texture
+    private Vector2 sparklePosition;       // Position of the sparkles
+    private float sparkleTimer;            // Timer for controlling sparkles
+    private static final float SPARKLE_DURATION = 1.0f; // Sparkle visibility duration in seconds
+    private float sparkleAlpha;            // Transparency of sparkles
 
     public LevelScreen_1(Game game) {
         this.game = game;
@@ -82,6 +87,10 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         checkingForFailure = false;
         failureCheckTimer = 0;
         setupErrorHandler();
+        sparkleTexture = new Texture(Gdx.files.internal("sparkles.png"));
+        sparklePosition = new Vector2();
+        sparkleTimer = 0;
+        sparkleAlpha = 1.0f;
     }
 
     private void setupErrorHandler() {
@@ -101,7 +110,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         Gdx.input.setInputProcessor(stage);
         batch = new SpriteBatch();
         levelBackground = new Texture(Gdx.files.internal("gameLevel_1.png"));
-
         pauseButtonTexture = new Texture(Gdx.files.internal("pause_button.png"));
         TextureRegionDrawable pauseDrawable = new TextureRegionDrawable(pauseButtonTexture);
         pauseButton = new ImageButton(pauseDrawable);
@@ -137,11 +145,17 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 }
             }
 
+            // Sparkle timer and alpha management
+            if (sparkleTimer > 0) {
+                sparkleTimer -= delta;
+                sparkleAlpha = Math.max(0, sparkleTimer / SPARKLE_DURATION); // Fade out effect
+            }
+
+
             if (pigDestroyed && structureDestroyed) {
                 levelCompleteTimer += delta;
                 if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
-                    game.setScreen(new SuccessScreen(game));
-                    return;
+                    checkLevelCompletion(); // New method to check level completion
                 }
             }
 
@@ -157,7 +171,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 bubblePig.update(delta);
                 pigRectangle.setPosition(bubblePig.getPosition().x, bubblePig.getPosition().y);
 
-                if (bubblePig.getPosition().y < -100) { // Adjust threshold as needed
+                // Check if pig falls below screen
+                if (bubblePig.getPosition().y < -100) {
                     pigDestroyed = true;
                 }
             }
@@ -180,6 +195,14 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (!pigDestroyed) {
                 bubblePig.render(batch);
             }
+
+            // Render sparkles when timer is active
+            if (sparkleTimer > 0) {
+                batch.setColor(1, 1, 1, sparkleAlpha); // Adjust transparency
+                batch.draw(sparkleTexture, sparklePosition.x, sparklePosition.y, 100, 100);
+                batch.setColor(1, 1, 1, 1); // Reset color
+            }
+
             if (!structureDestroyed) {
                 stoneStructure1.render(batch);
                 stoneStructure2.render(batch);
@@ -193,10 +216,16 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
             batch.end();
 
-
         } catch (Throwable t) {
             handleCrash(t);
         }
+    }
+
+    private void checkLevelCompletion() {
+        if (!LevelScreen.level1Completed) {
+            LevelScreen.level1Completed = true; // Mark level as completed
+        }
+        game.setScreen(new SuccessScreen(game)); // Transition to success screen
     }
 
     private void updateBirdPosition(float delta) {
@@ -294,9 +323,13 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             currentScore += PIG_POINTS;
             System.out.println("Pig hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
 
+            // Set sparkle position to pig's current position
+            sparklePosition.set(bubblePig.getPosition());
+            sparkleTimer = SPARKLE_DURATION;
+            sparkleAlpha = 1.0f;  // Reset alpha for full opacity
+
             levelComplete = true;
             LevelScreen.level1Completed = true;
-
         }
     }
 
@@ -507,6 +540,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (stoneStructure1 != null) stoneStructure1.dispose();
             if (stoneStructure2 != null) stoneStructure2.dispose();
             if (shapeRenderer != null) shapeRenderer.dispose();
+            if (sparkleTexture != null) sparkleTexture.dispose();
             if (scoreFont != null) scoreFont.dispose();
         } catch (Exception e) {
             Gdx.app.error("LevelScreen_1", "Error during disposal", e);

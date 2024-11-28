@@ -61,7 +61,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     public LevelScreen_1(Game game) {
         this.game = game;
         batch = new SpriteBatch();
-        pinkBird = new PinkBird(120, 200);
+        pinkBird = new PinkBird(120, 200); //COMMIT NO WORKKK
         bubblePig = new BubblePig(1090, 560);
         stoneStructure1 = new StoneStructure(1100, 100);
         stoneStructure2= new StoneStructure(1100, 320);

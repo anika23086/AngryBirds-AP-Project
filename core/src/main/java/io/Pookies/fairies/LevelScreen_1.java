@@ -144,7 +144,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                game.setScreen(new PauseScreen(game));
+                // Don't dispose the current screen when pausing
+                game.setScreen(new PauseScreen(game, (Screen)LevelScreen_1.this));
             }
         });
 
@@ -408,7 +409,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
         if (pauseButtonBounds.contains(touchPos.x, touchPos.y)) {
             ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-            game.setScreen(new PauseScreen(game));
+            // Don't dispose the current screen when pausing
+            game.setScreen(new PauseScreen(game, (Screen)this));
             return true;
         }
 
@@ -558,24 +560,59 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
     @Override
     public void hide() {
-        dispose();
     }
 
     @Override
     public void dispose() {
         try {
-            if (stage != null) stage.dispose();
-            if (batch != null) batch.dispose();
-            if (levelBackground != null) levelBackground.dispose();
-            if (pinkBird != null) pinkBird.dispose();
-            if (bubblePig != null) bubblePig.dispose();
-            if (stoneStructure1 != null) stoneStructure1.dispose();
-            if (stoneStructure2 != null) stoneStructure2.dispose();
-            if (shapeRenderer != null) shapeRenderer.dispose();
-            if (sparkleTexture != null) sparkleTexture.dispose();
-            if (scoreFont != null) scoreFont.dispose();
-            if (pauseButtonTexture != null) pauseButtonTexture.dispose();
-            if (simplePauseTexture != null) simplePauseTexture.dispose();
+            if (stage != null) {
+                stage.dispose();
+                stage = null;
+            }
+            if (batch != null) {
+                batch.dispose();
+                batch = null;
+            }
+            if (levelBackground != null) {
+                levelBackground.dispose();
+                levelBackground = null;
+            }
+            if (pinkBird != null) {
+                pinkBird.dispose();
+                pinkBird = null;
+            }
+            if (bubblePig != null) {
+                bubblePig.dispose();
+                bubblePig = null;
+            }
+            if (stoneStructure1 != null) {
+                stoneStructure1.dispose();
+                stoneStructure1 = null;
+            }
+            if (stoneStructure2 != null) {
+                stoneStructure2.dispose();
+                stoneStructure2 = null;
+            }
+            if (shapeRenderer != null) {
+                shapeRenderer.dispose();
+                shapeRenderer = null;
+            }
+            if (sparkleTexture != null) {
+                sparkleTexture.dispose();
+                sparkleTexture = null;
+            }
+            if (scoreFont != null) {
+                scoreFont.dispose();
+                scoreFont = null;
+            }
+            if (pauseButtonTexture != null) {
+                pauseButtonTexture.dispose();
+                pauseButtonTexture = null;
+            }
+            if (simplePauseTexture != null) {
+                simplePauseTexture.dispose();
+                simplePauseTexture = null;
+            }
         } catch (Exception e) {
             Gdx.app.error("LevelScreen_1", "Error during disposal", e);
         }

@@ -53,7 +53,8 @@ public class LevelScreen_3 implements Screen {
         pauseButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new PauseScreen(game));
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+                game.setScreen(new PauseScreen(game, (Screen)LevelScreen_3.this));
             }
         });
         stage.addActor(pauseButton);

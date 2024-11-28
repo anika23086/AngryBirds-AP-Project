@@ -22,16 +22,17 @@ public class PauseScreen implements Screen {
     private Texture menuButtonTexture;
     private Texture retryButtonTexture;
     private Texture exitButtonTexture;
+    private Screen previousScreen;
 
     private ImageButton resumeButton;
     private ImageButton menuButton;
     private ImageButton retryButton;
     private ImageButton exitButton;
 
-    public PauseScreen(Game game) {
+    public PauseScreen(Game game, Screen previousScreen) {
         this.game = game;
+        this.previousScreen = previousScreen;
     }
-
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
@@ -55,21 +56,15 @@ public class PauseScreen implements Screen {
         resumeButton.setPosition(Gdx.graphics.getWidth() / 2f - buttonWidth * 1.5f-40f, Gdx.graphics.getHeight() / 2f-120f);
         menuButton.setPosition(Gdx.graphics.getWidth() / 2f - buttonWidth / 2f-40f, Gdx.graphics.getHeight() / 2f-120f);
         retryButton.setPosition(Gdx.graphics.getWidth() / 2f + buttonWidth * 0.5f-40f, Gdx.graphics.getHeight() / 2f-120f);
-
         exitButton.setPosition(Gdx.graphics.getWidth() / 2f - exitButton.getWidth() / 2f-40f, Gdx.graphics.getHeight() / 2f - 225f); // Position below menu button
 
         resumeButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-
-                Screen currentLevel = ((Main) game).getCurrentLevel();
-
-                if (currentLevel != null) {
-                    game.setScreen(currentLevel);
-                } else {
-                    // Fallback to first level if no current level is tracked
-                    game.setScreen(new LevelScreen_1(game));
+                if (previousScreen != null) {
+                    dispose(); // Only dispose PauseScreen resources
+                    game.setScreen(previousScreen); // Return to previous screen
                 }
             }
         });
@@ -78,6 +73,10 @@ public class PauseScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+                if (previousScreen != null) {
+                    previousScreen.dispose(); // Dispose previous screen
+                }
+                dispose(); // Dispose pause screen
                 game.setScreen(new LevelScreen(game));
             }
         });
@@ -89,22 +88,18 @@ public class PauseScreen implements Screen {
 
                 Screen currentLevel = ((Main) game).getCurrentLevel();
 
-                if (currentLevel != null) {
-                    // Restart the current level by creating a new instance of the same level class
-                    if (currentLevel instanceof LevelScreen_1) {
+                if (previousScreen != null) {
+                    previousScreen.dispose(); // Dispose the previous screen when retrying
+                    // Create a new instance of the same level type
+                    if (previousScreen instanceof LevelScreen_1) {
                         game.setScreen(new LevelScreen_1(game));
-                    }
-                    else if (currentLevel instanceof LevelScreen_2) {
+                    } else if (previousScreen instanceof LevelScreen_2) {
                         game.setScreen(new LevelScreen_2(game));
-                    }
-                    else if(currentLevel instanceof LevelScreen_3){
+                    } else if (previousScreen instanceof LevelScreen_3) {
                         game.setScreen(new LevelScreen_3(game));
-                    }
-                    else {
+                    } else {
                         game.setScreen(new LevelScreen_1(game));
                     }
-                } else {
-                    game.setScreen(new LevelScreen_1(game));
                 }
             }
         });
@@ -113,8 +108,10 @@ public class PauseScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                Gdx.app.exit();
-            }
+                if (previousScreen != null) {
+                    previousScreen.dispose();
+                }
+                Gdx.app.exit();            }
         });
 
         stage.addActor(resumeButton);
@@ -153,12 +150,33 @@ public class PauseScreen implements Screen {
 
     @Override
     public void dispose() {
-        if (stage != null) stage.dispose();
-        if (batch != null) batch.dispose();
-        if (pauseBackground != null) pauseBackground.dispose();
-        if (resumeButtonTexture != null) resumeButtonTexture.dispose();
-        if (menuButtonTexture != null) menuButtonTexture.dispose();
-        if (retryButtonTexture != null) retryButtonTexture.dispose();
-        if (exitButtonTexture != null) exitButtonTexture.dispose();
+        if (stage != null) {
+            stage.dispose();
+            stage = null;
+        }
+        if (batch != null) {
+            batch.dispose();
+            batch = null;
+        }
+        if (pauseBackground != null) {
+            pauseBackground.dispose();
+            pauseBackground = null;
+        }
+        if (resumeButtonTexture != null) {
+            resumeButtonTexture.dispose();
+            resumeButtonTexture = null;
+        }
+        if (menuButtonTexture != null) {
+            menuButtonTexture.dispose();
+            menuButtonTexture = null;
+        }
+        if (retryButtonTexture != null) {
+            retryButtonTexture.dispose();
+            retryButtonTexture = null;
+        }
+        if (exitButtonTexture != null) {
+            exitButtonTexture.dispose();
+            exitButtonTexture = null;
+        }
     }
 }

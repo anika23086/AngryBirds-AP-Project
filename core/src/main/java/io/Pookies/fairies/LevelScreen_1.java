@@ -128,6 +128,9 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (levelComplete) {
                 levelCompleteTimer += delta;
                 if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
+                    if (!LevelScreen.level1Completed) {
+                        LevelScreen.level1Completed = true;
+                    }
                     game.setScreen(new SuccessScreen(game));
                     return;
                 }
@@ -150,11 +153,9 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             }
 
             if (gameStarted && !pigDestroyed) {
-                // Update pig's position and check for falling
                 bubblePig.update(delta);
                 pigRectangle.setPosition(bubblePig.getPosition().x, bubblePig.getPosition().y);
 
-                // Check if pig has fallen off screen
                 if (bubblePig.getPosition().y < -100) { // Adjust threshold as needed
                     pigDestroyed = true;
                 }
@@ -190,6 +191,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             }
 
             batch.end();
+
 
         } catch (Throwable t) {
             handleCrash(t);
@@ -292,6 +294,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             System.out.println("Pig hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
 
             levelComplete = true;
+            LevelScreen.level1Completed = true;
+
         }
     }
 

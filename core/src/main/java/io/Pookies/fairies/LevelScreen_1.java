@@ -23,8 +23,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private Stage stage;
     private SpriteBatch batch;
     private Texture levelBackground;
-    private Texture pauseButtonTexture;
-    private ImageButton pauseButton;
     private PinkBird pinkBird;
     private BubblePig bubblePig;
     private StoneStructure stoneStructure1, stoneStructure2;
@@ -62,6 +60,13 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private float sparkleTimer;            // Timer for controlling sparkles
     private static final float SPARKLE_DURATION = 1.0f; // Sparkle visibility duration in seconds
     private float sparkleAlpha;            // Transparency of sparkles
+    private ImageButton pauseButton;
+    private Texture pauseButtonTexture;
+    private ShapeRenderer debugRenderer = new ShapeRenderer();
+    private Texture simplePauseTexture;
+    private Rectangle pauseButtonBounds;
+    private static final int PAUSE_BUTTON_SIZE = 50;
+    private static final int PADDING = 10;
 
     public LevelScreen_1(Game game) {
         this.game = game;
@@ -91,6 +96,13 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         sparklePosition = new Vector2();
         sparkleTimer = 0;
         sparkleAlpha = 1.0f;
+        simplePauseTexture = new Texture(Gdx.files.internal("pause_button.png"));
+        pauseButtonBounds = new Rectangle(
+            Gdx.graphics.getWidth() - PAUSE_BUTTON_SIZE - PADDING,
+            Gdx.graphics.getHeight() - PAUSE_BUTTON_SIZE - PADDING,
+            PAUSE_BUTTON_SIZE,
+            PAUSE_BUTTON_SIZE
+        );
     }
 
     private void setupErrorHandler() {
@@ -110,29 +122,43 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         Gdx.input.setInputProcessor(stage);
         batch = new SpriteBatch();
         levelBackground = new Texture(Gdx.files.internal("gameLevel_1.png"));
-        pauseButtonTexture = new Texture(Gdx.files.internal("pause_button.png"));
-        TextureRegionDrawable pauseDrawable = new TextureRegionDrawable(pauseButtonTexture);
-        pauseButton = new ImageButton(pauseDrawable);
-        pauseButton.setPosition(Gdx.graphics.getWidth() - pauseButton.getWidth() - 20, Gdx.graphics.getHeight() - pauseButton.getHeight() - 20);
-        pauseButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                ((Main) game).clickSound.play(clickSoundVolume);
-                game.setScreen(new PauseScreen(game));
-            }
-        });
-        stage.addActor(pauseButton);
 
         InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(this);
         multiplexer.addProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
+
+        // Add pause button
+        pauseButtonTexture = new Texture(Gdx.files.internal("pause_button.png"));
+        TextureRegionDrawable pauseDrawable = new TextureRegionDrawable(pauseButtonTexture);
+        pauseButton = new ImageButton(pauseDrawable);
+
+        // Position the button in the top-right corner with proper padding
+        pauseButton.setPosition(
+            Gdx.graphics.getWidth() - pauseButton.getWidth(),
+            Gdx.graphics.getHeight() - pauseButton.getHeight()
+        );
+
+        // Add click listener
+        pauseButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+                game.setScreen(new PauseScreen(game));
+            }
+        });
+
+        // Debug statement to verify button addition
+        Gdx.app.log("LevelScreen_1", "Pause button added to stage");
+        Gdx.app.log("LevelScreen_1", "Pause button position: (" + pauseButton.getX() + ", " + pauseButton.getY() + "), size: (" + pauseButton.getWidth() + ", " + pauseButton.getHeight() + ")");
     }
 
     @Override
     public void render(float delta) {
         try {
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+            batch.begin();
+            batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
             if (levelComplete) {
                 levelCompleteTimer += delta;
@@ -150,7 +176,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 sparkleTimer -= delta;
                 sparkleAlpha = Math.max(0, sparkleTimer / SPARKLE_DURATION); // Fade out effect
             }
-
 
             if (pigDestroyed && structureDestroyed) {
                 levelCompleteTimer += delta;
@@ -183,11 +208,14 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 checkCollisions();
             }
 
+            batch.draw(simplePauseTexture,
+                pauseButtonBounds.x,
+                pauseButtonBounds.y,
+                pauseButtonBounds.width,
+                pauseButtonBounds.height);
+
             stage.act(delta);
             stage.draw();
-
-            batch.begin();
-            batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
             if (!birdDestroyed) {
                 pinkBird.render(batch);
@@ -208,7 +236,9 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 stoneStructure2.render(batch);
             }
             slingshot.render(batch);
-            scoreFont.draw(batch, "Score: " + currentScore, 1700, Gdx.graphics.getHeight() - 20);
+
+            // Render score counter below the level 1 board
+            scoreFont.draw(batch, "Score: " + currentScore, 40, Gdx.graphics.getHeight() - 115);
 
             if (showTrajectory && dragStart != null) {
                 renderTrajectoryPreview();
@@ -254,7 +284,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 stoneStructure2.render(batch);
             }
             slingshot.render(batch);
-            scoreFont.draw(batch, "Score: " + currentScore, 1700, Gdx.graphics.getHeight() - 20);
+            scoreFont.draw(batch, "Score: " + currentScore, 10, Gdx.graphics.getHeight() - 100); // Move score counter below the level 1 board
 
             batch.end();
         } catch (Throwable t) {
@@ -342,7 +372,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         }
     }
 
-
     private void renderTrajectoryPreview() {
         // Prepare ShapeRenderer for drawing
         shapeRenderer.setProjectionMatrix(stage.getCamera().combined); // Use the stage's camera
@@ -376,6 +405,12 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 touchPos = new Vector3(screenX, screenY, 0);
         stage.getCamera().unproject(touchPos);
+
+        if (pauseButtonBounds.contains(touchPos.x, touchPos.y)) {
+            ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+            game.setScreen(new PauseScreen(game));
+            return true;
+        }
 
         // Check if touch is near the bird
         if (pinkBird.contains(touchPos.x, touchPos.y)) {
@@ -444,7 +479,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             showTrajectory = false;
             // Reset drag start
 
-
         }
         return true;
     }
@@ -504,7 +538,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         return withinStructureWidth && directlyAbove;
     }
 
-
     // Implement other InputProcessor methods (return false)
     @Override public boolean keyDown(int keycode) { return false; }
     @Override public boolean keyUp(int keycode) { return false; }
@@ -534,7 +567,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (stage != null) stage.dispose();
             if (batch != null) batch.dispose();
             if (levelBackground != null) levelBackground.dispose();
-            if (pauseButtonTexture != null) pauseButtonTexture.dispose();
             if (pinkBird != null) pinkBird.dispose();
             if (bubblePig != null) bubblePig.dispose();
             if (stoneStructure1 != null) stoneStructure1.dispose();
@@ -542,6 +574,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (shapeRenderer != null) shapeRenderer.dispose();
             if (sparkleTexture != null) sparkleTexture.dispose();
             if (scoreFont != null) scoreFont.dispose();
+            if (pauseButtonTexture != null) pauseButtonTexture.dispose();
+            if (simplePauseTexture != null) simplePauseTexture.dispose();
         } catch (Exception e) {
             Gdx.app.error("LevelScreen_1", "Error during disposal", e);
         }

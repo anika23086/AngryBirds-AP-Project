@@ -62,7 +62,15 @@ public class PauseScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                game.setScreen(new LevelScreen_1(game));
+
+                Screen currentLevel = ((Main) game).getCurrentLevel();
+
+                if (currentLevel != null) {
+                    game.setScreen(currentLevel);
+                } else {
+                    // Fallback to first level if no current level is tracked
+                    game.setScreen(new LevelScreen_1(game));
+                }
             }
         });
 
@@ -78,7 +86,26 @@ public class PauseScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                game.setScreen(new LevelScreen_1(game)); // Restart level
+
+                Screen currentLevel = ((Main) game).getCurrentLevel();
+
+                if (currentLevel != null) {
+                    // Restart the current level by creating a new instance of the same level class
+                    if (currentLevel instanceof LevelScreen_1) {
+                        game.setScreen(new LevelScreen_1(game));
+                    }
+                    else if (currentLevel instanceof LevelScreen_2) {
+                        game.setScreen(new LevelScreen_2(game));
+                    }
+                    else if(currentLevel instanceof LevelScreen_3){
+                        game.setScreen(new LevelScreen_3(game));
+                    }
+                    else {
+                        game.setScreen(new LevelScreen_1(game));
+                    }
+                } else {
+                    game.setScreen(new LevelScreen_1(game));
+                }
             }
         });
 

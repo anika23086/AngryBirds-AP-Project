@@ -28,6 +28,7 @@ public class LevelScreen_3 implements Screen {
 
     public LevelScreen_3(Game game) {
         this.game = game;
+        ((Main) game).setCurrentLevel(this);
         batch = new SpriteBatch();
         purplebird = new PurpleBird(30, 80);
         bubblePig1 = new BubblePig(885, 380);
@@ -42,7 +43,7 @@ public class LevelScreen_3 implements Screen {
     @Override
     public void show() {
         batch = new SpriteBatch();
-        level2game = new Texture(Gdx.files.internal("gameLevel_2.png"));
+        level2game = new Texture(Gdx.files.internal("level3_background.png"));
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
         pauseButtonTexture = new Texture(Gdx.files.internal("pause_button.png"));

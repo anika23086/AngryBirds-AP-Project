@@ -2,6 +2,7 @@ package io.Pookies.fairies;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -11,6 +12,20 @@ public class Main extends Game {
     private Music backgroundMusic;
     public Sound clickSound;
     public float clickSoundVolume = 1.0f;
+    private Screen currentLevel;
+
+    public void setCurrentLevel(Screen level){
+        this.currentLevel = level;
+    }
+
+    public Screen getCurrentLevel(){
+        return this.currentLevel;
+    }
+
+    public void switchToLevel(Screen newLevel){
+        setCurrentLevel(newLevel);
+        setScreen(newLevel);
+    }
 
     @Override
     public void create() {

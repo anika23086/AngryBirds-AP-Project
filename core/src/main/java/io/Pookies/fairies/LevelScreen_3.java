@@ -6,14 +6,14 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
-public class LevelScreen_2 implements Screen {
+public class LevelScreen_3 implements Screen {
     private final Game game;
     private SpriteBatch batch;
     private Texture level2game;
@@ -23,11 +23,10 @@ public class LevelScreen_2 implements Screen {
     private Texture pauseButtonTexture;
     private ImageButton pauseButton;
     private BubblePig bubblePig1, bubblePig2;
-    private StoneStructure stoneStructure1, stoneStructure2;
-    private IceStructure icestructure1, icestructure2;
+    private StoneStructure stoneStructure1, stoneStructure2, stoneStructure3, stoneStructure4;
     private Slingshot slingshot;
 
-    public LevelScreen_2(Game game) {
+    public LevelScreen_3(Game game) {
         this.game = game;
         batch = new SpriteBatch();
         purplebird = new PurpleBird(30, 80);
@@ -35,8 +34,8 @@ public class LevelScreen_2 implements Screen {
         bubblePig2 = new BubblePig(1130, 275);
         stoneStructure1 = new StoneStructure(1015, 380);
         stoneStructure2 = new StoneStructure(1130, 150);
-        icestructure1 = new IceStructure(1015, 150);
-        icestructure2 = new IceStructure(900, 150);
+        stoneStructure3 = new StoneStructure(1015, 150);
+        stoneStructure4 = new StoneStructure(900, 150);
         slingshot = new Slingshot(220, 130);
     }
 
@@ -69,8 +68,8 @@ public class LevelScreen_2 implements Screen {
         bubblePig2.render(batch);
         stoneStructure1.render(batch);
         stoneStructure2.render(batch);
-        icestructure1.render(batch);
-        icestructure2.render(batch);
+        stoneStructure3.render(batch);
+        stoneStructure4.render(batch);
         slingshot.render(batch);
         batch.end();
         if (Gdx.input.justTouched() && !levelCompleted) {
@@ -111,7 +110,7 @@ public class LevelScreen_2 implements Screen {
         bubblePig2.dispose();
         stoneStructure1.dispose();
         stoneStructure2.dispose();
-        icestructure1.dispose();
-        icestructure2.dispose();
+        stoneStructure3.dispose();
+        stoneStructure4.dispose();
     }
 }

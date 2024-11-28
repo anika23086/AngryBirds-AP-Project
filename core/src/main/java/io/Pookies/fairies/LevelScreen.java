@@ -21,11 +21,13 @@ public class LevelScreen implements Screen {
     private Texture backgroundTexture;
     private Texture level1ButtonTexture;
     private Texture level2ButtonTexture;
+    private Texture level3ButtonTexture;
     private Texture exitButtonTexture;
     private Texture incompleteButtonTexture;
-    private ImageButton level1Button, level2Button, exitButton;
+    private ImageButton level1Button, level2Button, level3Button, exitButton;
 
     public static boolean level1Completed = false;
+    public static boolean level2Completed = false;
 
     public LevelScreen(Game game) {
         this.game = game;
@@ -35,28 +37,48 @@ public class LevelScreen implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+
         batch = new SpriteBatch();
 
+        // Load textures
         backgroundTexture = new Texture(Gdx.files.internal("levels_background.png"));
         level1ButtonTexture = new Texture(Gdx.files.internal("level1button.png"));
         level2ButtonTexture = new Texture(Gdx.files.internal("level2button.png"));
+        level3ButtonTexture = new Texture(Gdx.files.internal("level3button.png"));
         exitButtonTexture = new Texture(Gdx.files.internal("exit_button.png"));
         incompleteButtonTexture = new Texture(Gdx.files.internal("incompleteButton.png"));
 
+        // Create buttons
         level1Button = new ImageButton(new TextureRegionDrawable(new TextureRegion(level1ButtonTexture)));
-        exitButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(exitButtonTexture)));
 
-        TextureRegion level2Region = new TextureRegion(level1Completed ? level2ButtonTexture : incompleteButtonTexture);
+        // Dynamically set level 2 button texture based on level 1 completion
+        TextureRegion level2Region = new TextureRegion(
+            level1Completed ? level2ButtonTexture : incompleteButtonTexture
+        );
         level2Button = new ImageButton(new TextureRegionDrawable(level2Region));
 
+        // Dynamically set level 3 button texture based on level 2 completion
+        TextureRegion level3Region = new TextureRegion(
+            level2Completed ? level3ButtonTexture : incompleteButtonTexture
+        );
+        level3Button = new ImageButton(new TextureRegionDrawable(level3Region));
+
+        exitButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(exitButtonTexture)));
+
+        // Position buttons
         level1Button.setPosition(
             Gdx.graphics.getWidth() / 3f - level1Button.getWidth() / 3f - 350,
-            Gdx.graphics.getHeight() / 3f + 50f
+            Gdx.graphics.getHeight() / 2f - 175
         );
 
         level2Button.setPosition(
-            Gdx.graphics.getWidth() / 3f - level2Button.getWidth() / 3f +300f,
-            Gdx.graphics.getHeight() / 3f + 315f
+            Gdx.graphics.getWidth() / 3f - level2Button.getWidth() / 3f+175,
+            Gdx.graphics.getHeight() / 2f - 175
+        );
+
+        level3Button.setPosition(
+            Gdx.graphics.getWidth() / 3f - level3Button.getWidth() / 3f + 650,
+            Gdx.graphics.getHeight() / 2f - 175
         );
 
         exitButton.setPosition(
@@ -64,6 +86,7 @@ public class LevelScreen implements Screen {
             Gdx.graphics.getHeight() - exitButton.getHeight() - 20
         );
 
+        // Level 1 button listener
         level1Button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -72,6 +95,7 @@ public class LevelScreen implements Screen {
             }
         });
 
+        // Level 2 button listener
         level2Button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -84,6 +108,20 @@ public class LevelScreen implements Screen {
             }
         });
 
+        // Level 3 button listener
+        level3Button.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+                if (level2Completed) {
+                    game.setScreen(new LevelScreen_3(game));
+                } else {
+                    System.out.println("Complete Level 2 first!");
+                }
+            }
+        });
+
+        // Exit button listener
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -92,14 +130,17 @@ public class LevelScreen implements Screen {
             }
         });
 
+        // Add actors to stage
         stage.addActor(level1Button);
         stage.addActor(level2Button);
+        stage.addActor(level3Button);
         stage.addActor(exitButton);
     }
 
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         batch.begin();
         batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         batch.end();
@@ -114,10 +155,12 @@ public class LevelScreen implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
     public void hide() {
@@ -126,12 +169,13 @@ public class LevelScreen implements Screen {
 
     @Override
     public void dispose() {
-        if (stage != null) stage.dispose();
-        if (batch != null) batch.dispose();
-        if (backgroundTexture != null) backgroundTexture.dispose();
-        if (level1ButtonTexture != null) level1ButtonTexture.dispose();
-        if (level2ButtonTexture != null) level2ButtonTexture.dispose();
-        if (exitButtonTexture != null) exitButtonTexture.dispose();
-        if (incompleteButtonTexture != null) incompleteButtonTexture.dispose();
+        stage.dispose();
+        batch.dispose();
+        backgroundTexture.dispose();
+        level1ButtonTexture.dispose();
+        level2ButtonTexture.dispose();
+        level3ButtonTexture.dispose();
+        exitButtonTexture.dispose();
+        incompleteButtonTexture.dispose();
     }
 }

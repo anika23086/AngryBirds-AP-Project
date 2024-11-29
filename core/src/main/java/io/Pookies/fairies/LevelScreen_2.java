@@ -17,13 +17,16 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.Pookies.fairies.LevelScreen_1.FAILURE_CHECK_DELAY;
+
 public class LevelScreen_2 implements Screen, InputProcessor {
     private final Game game;
     private Stage stage;
     private SpriteBatch batch;
     private Texture levelBackground;
-    private PurpleBird purpleBird;
-    private PinkBird pinkBird1, pinkBird2;
     private UnclePig unclePig1;
     private BubblePig bubblePig1;
     private WoodStructure woodStructure1;
@@ -37,7 +40,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     private float launchPower;
     private float launchAngle;
     private ShapeRenderer shapeRenderer;
-    private boolean showTrajectory;
     private boolean pigDestroyed1 = false;
     private boolean pigDestroyed2 = false;
     private boolean woodStructureDestroyed = false;
@@ -57,7 +59,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     private static final float LEVEL_COMPLETE_DELAY = 1.0f;
     private boolean checkingForFailure = false;
     private float failureCheckTimer = 0;
-    private static final float FAILURE_CHECK_DELAY = 2.0f;
     private static final float VELOCITY_THRESHOLD = 1.0f;
     private static final float SCREEN_BOUNDS_MARGIN = 100f;
     private boolean isErrorHandlerSet = false;
@@ -74,17 +75,14 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     private static final int PAUSE_BUTTON_SIZE = 50;
     private static final int PADDING = 10;
 
-    private Bird currentBird;
-    private Bird[] birds;
-    private int currentBirdIndex = 0;
+    private List<Bird> birds = new ArrayList<>();  // List to hold your birds
+    private int currentBirdIndex = 0;    // Keeps track of the active bird
+    private Bird currentBird;            // The bird that's currently ready to be launched
 
     public LevelScreen_2(Game game) {
         this.game = game;
         ((Main) game).setCurrentLevel(this);
         batch = new SpriteBatch();
-        purpleBird = new PurpleBird(150, 240);
-        pinkBird1 = new PinkBird(150, 240);
-        pinkBird2 = new PinkBird(150, 240);
         unclePig1 = new UnclePig(920, 650);
         bubblePig1 = new BubblePig(1025, 375);
         woodStructure1 = new WoodStructure(900, 380);
@@ -95,7 +93,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
         gameStarted = false;
         slingshotOrigin = new Vector2(220, 130);
         shapeRenderer = new ShapeRenderer();
-        showTrajectory = false;
         birdRectangle = new Rectangle(30, 80, 50, 50);
         pigRectangle1 = new Rectangle(920, 650, 50, 50);
         pigRectangle2 = new Rectangle(1025, 375, 50, 50);
@@ -120,9 +117,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             PAUSE_BUTTON_SIZE,
             PAUSE_BUTTON_SIZE
         );
-
-        birds = new Bird[]{purpleBird, pinkBird1, pinkBird2};
-        currentBird = birds[currentBirdIndex];
     }
 
     private void setupErrorHandler() {
@@ -165,6 +159,15 @@ public class LevelScreen_2 implements Screen, InputProcessor {
 
         Gdx.app.log("LevelScreen_2", "Pause button added to stage");
         Gdx.app.log("LevelScreen_2", "Pause button position: (" + pauseButton.getX() + ", " + pauseButton.getY() + "), size: (" + pauseButton.getWidth() + ", " + pauseButton.getHeight() + ")");
+
+        // Initialize the birds
+        birds.add(new PurpleBird(150, 240)); // First bird, purple
+        birds.add(new PinkBird(150, 240));   // Second bird, pink
+        birds.add(new PinkBird(150, 240));   // Third bird, pink
+
+        // Set the first bird as the current bird
+        currentBird = birds.get(0);
+        currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y); // Initial position at the slingshot
     }
 
     @Override
@@ -327,7 +330,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             Gdx.app.postRunnable(() -> {
                 try {
                     dispose();
-                    game.setScreen(new FailureScreen(game, 2));
+                    game.setScreen(new FailureScreen(game,2));
                 } catch (Exception e) {
                     Gdx.app.error("LevelScreen_2", "Failed to show failure screen", e);
                     Gdx.app.exit();
@@ -462,7 +465,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             launchPower = Math.min(dragDistance / maxDragDistance, 1f);
             launchAngle = (float) Math.atan2(dragVector.y, dragVector.x);
 
-            showTrajectory = true;
         }
         return true;
     }
@@ -470,100 +472,33 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (dragStart != null) {
+            // Launch the current bird
             Vector2 touchPos = new Vector2(screenX, screenY);
             Vector2 dragVector = new Vector2(dragStart.x - touchPos.x, dragStart.y - touchPos.y);
             float dragDistance = dragVector.len();
-            float maxDragDistance = 200f; // Define your maximum allowable drag distance
             float launchPower = Math.min(dragDistance / maxDragDistance, 1f);
 
-            float velocityMultiplier = 2000f; // Use the same multiplier as in Level 1
+            float velocityMultiplier = 2000f;
 
+            // Calculate launch velocity
             float launchSpeedX = (float) (launchPower * Math.cos(launchAngle) * velocityMultiplier);
             float launchSpeedY = (float) (launchPower * Math.sin(launchAngle) * velocityMultiplier);
 
-            currentBird.launch(launchSpeedX, launchSpeedY);
+            currentBird.launch(launchSpeedX, launchSpeedY);  // Launch the current bird
             gameStarted = true;
             dragStart = null;
-            showTrajectory = false;
 
-            // Move to the next bird
-            currentBirdIndex = (currentBirdIndex + 1) % birds.length;
-            currentBird = birds[currentBirdIndex];
-            currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y);
+            // Move to the next bird in the sequence after the current one is launched
+            currentBirdIndex = (currentBirdIndex + 1) % birds.size();
+            currentBird = birds.get(currentBirdIndex);  // Set the next bird as the current one
+            currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y);  // Position it at the slingshot
+            currentBird.reset();  // Reset the bird's state for the next round
         }
         return true;
     }
 
     public boolean touchCancelled(int i, int i1, int i2, int i3) {
         return false;
-    }
-
-    private void checkPigsOnDestroyedStructures() {
-        if (woodStructureDestroyed) {
-            Rectangle structureRect1 = new Rectangle(900, 380, 100, 200);
-
-            if (!pigDestroyed1 && isPigDirectlyAboveStructure(structureRect1)) {
-                handlePigFall(1);
-            }
-            if (!pigDestroyed2 && isPigDirectlyAboveStructure(structureRect1)) {
-                handlePigFall(2);
-            }
-        }
-
-        if (iceStructureDestroyed1) {
-            Rectangle structureRect2 = new Rectangle(1018, 150, 100, 200);
-
-            if (!pigDestroyed1 && isPigDirectlyAboveStructure(structureRect2)) {
-                handlePigFall(1);
-            }
-            if (!pigDestroyed2 && isPigDirectlyAboveStructure(structureRect2)) {
-                handlePigFall(2);
-            }
-        }
-
-        if (iceStructureDestroyed2) {
-            Rectangle structureRect3 = new Rectangle(900, 150, 100, 200);
-
-            if (!pigDestroyed1 && isPigDirectlyAboveStructure(structureRect3)) {
-                handlePigFall(1);
-            }
-            if (!pigDestroyed2 && isPigDirectlyAboveStructure(structureRect3)) {
-                handlePigFall(2);
-            }
-        }
-    }
-
-    private boolean isOverlapping(Rectangle pigRect, Rectangle structureRect) {
-        return pigRect.x >= structureRect.x &&
-            pigRect.x <= structureRect.x + structureRect.width &&
-            pigRect.y >= structureRect.y &&
-            pigRect.y <= structureRect.y + structureRect.height;
-    }
-
-    private void handlePigFall(int pigNumber) {
-        if (pigNumber == 1 && !pigDestroyed1) {
-            unclePig1.startFalling();
-            pigDestroyed1 = true;
-            currentScore += PIG_POINTS;
-            System.out.println("Pig 1 fell! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
-        } else if (pigNumber == 2 && !pigDestroyed2) {
-            bubblePig1.startFalling();
-            pigDestroyed2 = true;
-            currentScore += PIG_POINTS;
-            System.out.println("Pig 2 fell! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
-        }
-    }
-
-    private boolean isPigDirectlyAboveStructure(Rectangle structureRect) {
-        boolean withinStructureWidth =
-            pigRectangle1.x >= structureRect.x &&
-                pigRectangle1.x <= structureRect.x + structureRect.width;
-
-        boolean directlyAbove =
-            pigRectangle1.y >= structureRect.y + structureRect.height &&
-                pigRectangle1.y <= structureRect.y + structureRect.height + 100;
-
-        return withinStructureWidth && directlyAbove;
     }
 
     @Override public boolean keyDown(int keycode) { return false; }
@@ -602,17 +537,10 @@ public class LevelScreen_2 implements Screen, InputProcessor {
                 levelBackground.dispose();
                 levelBackground = null;
             }
-            if (purpleBird != null) {
-                purpleBird.dispose();
-                purpleBird = null;
-            }
-            if (pinkBird1 != null) {
-                pinkBird1.dispose();
-                pinkBird1 = null;
-            }
-            if (pinkBird2 != null) {
-                pinkBird2.dispose();
-                pinkBird2 = null;
+            for (Bird bird : birds) {
+                if (bird != null) {
+                    bird.dispose();
+                }
             }
             if (unclePig1 != null) {
                 unclePig1.dispose();

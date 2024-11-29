@@ -35,7 +35,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private float launchPower;
     private float launchAngle;
     private ShapeRenderer shapeRenderer;
-    private boolean showTrajectory;
     private boolean pigDestroyed = false;
     private boolean stoneStructure1Destroyed = false;
     private boolean stoneStructure2Destroyed = false;
@@ -51,7 +50,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private static final float LEVEL_COMPLETE_DELAY = 1.0f;
     private boolean checkingForFailure = false;
     private float failureCheckTimer = 0;
-    private static final float FAILURE_CHECK_DELAY = 2.0f;
+    static final float FAILURE_CHECK_DELAY = 2.0f;
     private static final float VELOCITY_THRESHOLD = 1.0f;
     private static final float SCREEN_BOUNDS_MARGIN = 100f;
     private boolean isErrorHandlerSet = false;
@@ -81,7 +80,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         gameStarted = false;
         slingshotOrigin = new Vector2(220, 130);
         shapeRenderer = new ShapeRenderer();
-        showTrajectory = false;
         birdRectangle = new Rectangle(120, 200, 50, 50); // Use approximate sizes
         pigRectangle = new Rectangle(1090, 560, 50, 50);
         scoreFont = new BitmapFont();
@@ -243,9 +241,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             // Render score counter below the level 1 board
             scoreFont.draw(batch, "Score: " + currentScore, 40, Gdx.graphics.getHeight() - 115);
 
-            if (showTrajectory && dragStart != null) {
-                renderTrajectoryPreview();
-            }
+
 
             batch.end();
 
@@ -392,9 +388,9 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             return birdRect.overlaps(pigRect);
         }
 
-        if (obj1 instanceof Bird && obj2 instanceof Structure) {
+        if (obj1 instanceof Bird && obj2 instanceof StoneStructure) {
             Bird bird = (Bird) obj1;
-            Structure structure = (Structure) obj2;
+            StoneStructure structure = (StoneStructure) obj2;
 
             // Get the current positions
             Vector2 birdPos = bird.getPosition();
@@ -426,65 +422,66 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     }
 
     private void handlePigCollision() {
-        if (!pigDestroyed) {  // Check to prevent multiple score additions
-            pigDestroyed = true;
+        //
+
+        // Reduce pig's health
+        bubblePig.takeHit(pinkBird);
+
+        // Check if pig is destroyed
+        if (bubblePig.getCurrentHealth() <= 0) {
+            if (!pigDestroyed) {  // Check to prevent multiple score additions
+                pigDestroyed = true;
+                birdDestroyed = true;
+                currentScore += PIG_POINTS;
+                System.out.println("Pig hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+
+                // Set sparkle position to pig's current position
+                sparklePosition.set(bubblePig.getPosition());
+                sparkleTimer = SPARKLE_DURATION;
+                sparkleAlpha = 1.0f;  // Reset alpha for full opacity
+
+                levelComplete = true;
+                LevelScreen.level1Completed = true;
+            }
+        } else {
+            // Bird is destroyed after hitting the pig
             birdDestroyed = true;
-            currentScore += PIG_POINTS;
-            System.out.println("Pig hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
-
-            // Set sparkle position to pig's current position
-            sparklePosition.set(bubblePig.getPosition());
-            sparkleTimer = SPARKLE_DURATION;
-            sparkleAlpha = 1.0f;  // Reset alpha for full opacity
-
-            levelComplete = true;
-            LevelScreen.level1Completed = true;
         }
     }
 
     private void handleStructureCollision(int structureNumber) {
+
         if (structureNumber == 1 && !stoneStructure1Destroyed) {
-            stoneStructure1Destroyed = true;
-            birdDestroyed = true;
-            currentScore += STRUCTURE_POINTS;
-            System.out.println("Structure 1 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+            // Reduce structure's health
+            stoneStructure1.takeHit(pinkBird);
+
+            // Check if structure is destroyed
+            if (stoneStructure1.getCurrentDurability() <= 0) {
+                stoneStructure1Destroyed = true;
+                birdDestroyed = true;
+                currentScore += STRUCTURE_POINTS;
+                System.out.println("Structure 1 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+            } else {
+                birdDestroyed = true;
+            }
         }
         else if (structureNumber == 2 && !stoneStructure2Destroyed) {
-            stoneStructure2Destroyed = true;
-            birdDestroyed = true;
-            currentScore += STRUCTURE_POINTS;
-            System.out.println("Structure 2 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+            // Reduce structure's health
+            stoneStructure2.takeHit(pinkBird);
+
+            // Check if structure is destroyed
+            if (stoneStructure2.getCurrentDurability() <= 0) {
+                stoneStructure2Destroyed = true;
+                birdDestroyed = true;
+                currentScore += STRUCTURE_POINTS;
+                System.out.println("Structure 2 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+            } else {
+                birdDestroyed = true;
+            }
         }
     }
 
-    private void renderTrajectoryPreview() {
-        // Prepare ShapeRenderer for drawing
-        shapeRenderer.setProjectionMatrix(stage.getCamera().combined); // Use the stage's camera
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.ORANGE); // Dotted path color
 
-        // Initialize trajectory variables
-        float velocityMultiplier = 2000f; // Adjust this multiplier for scaling
-        float launchSpeedX = (float) (launchPower * Math.cos(launchAngle) * velocityMultiplier);
-        float launchSpeedY = (float) (launchPower * Math.sin(launchAngle) * velocityMultiplier);
-        float x = pinkBird.getPosition().x;
-        float y = pinkBird.getPosition().y;
-        float vx = launchSpeedX / 1000f;  // Convert velocity to a smaller scale
-        float vy = launchSpeedY / 1000f;
-        float gravity = 9.8f; // Gravitational constant
-
-        // Time intervals for trajectory points
-        for (float t = 0; t < 3; t += 0.1f) {
-            // Calculate position at time t
-            float nextX = x + vx * t;
-            float nextY = y + vy * t - 0.5f * gravity * t * t;
-
-            // Draw a small circle to represent the dot
-            shapeRenderer.circle(nextX, nextY, 5f); // Radius of the circle is 5
-        }
-
-        shapeRenderer.end();
-    }
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -530,8 +527,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             launchPower = Math.min(dragDistance / maxDragDistance, 1f);
             launchAngle = (float) Math.atan2(dragVector.y, dragVector.x);
 
-            // Enable trajectory preview
-            showTrajectory = true;
+
 
         }
         return true;
@@ -562,7 +558,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             pinkBird.launch(launchSpeedX, launchSpeedY);
             gameStarted = true;
             dragStart = null;
-            showTrajectory = false;
             // Reset drag start
 
         }
@@ -571,57 +566,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
     public boolean touchCancelled(int i, int i1, int i2, int i3) {
         return false;
-    }
-
-    private void checkPigsOnDestroyedStructures() {
-        if (stoneStructure1Destroyed) {
-            Rectangle structureRect1 = new Rectangle(1100, 100, 100, 200);
-            if (!pigDestroyed && isPigDirectlyAboveStructure(structureRect1)) {
-                handlePigFall();
-            }
-        }
-
-        if (stoneStructure2Destroyed) {
-            Rectangle structureRect2 = new Rectangle(1100, 320, 100, 200);
-            if (!pigDestroyed && isPigDirectlyAboveStructure(structureRect2)) {
-                handlePigFall();
-            }
-        }
-    }
-
-    private boolean isOverlapping(Rectangle pigRect, Rectangle structureRect) {
-        // Check if pig is sitting on top of or within the structure
-        return pigRect.x >= structureRect.x &&
-            pigRect.x <= structureRect.x + structureRect.width &&
-            pigRect.y >= structureRect.y &&
-            pigRect.y <= structureRect.y + structureRect.height;
-    }
-
-    private void handlePigFall() {
-        if (!pigDestroyed) {
-            // Add falling mechanism
-            bubblePig.startFalling(); // Assuming you'll add this method to BubblePig class
-
-            // Award points for pig falling
-            pigDestroyed = true;
-            currentScore += PIG_POINTS;
-            System.out.println("Pig fell! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
-        }
-    }
-
-    private boolean isPigDirectlyAboveStructure(Rectangle structureRect) {
-        // Check if pig's x-coordinate is within the width of the structure
-        boolean withinStructureWidth =
-            pigRectangle.x >= structureRect.x &&
-                pigRectangle.x <= structureRect.x + structureRect.width;
-
-        // Check if pig is directly above the structure
-        // (y position of pig is just above the top of the structure)
-        boolean directlyAbove =
-            pigRectangle.y >= structureRect.y + structureRect.height &&
-                pigRectangle.y <= structureRect.y + structureRect.height + 100; // Allow some vertical tolerance
-
-        return withinStructureWidth && directlyAbove;
     }
 
     // Implement other InputProcessor methods (return false)

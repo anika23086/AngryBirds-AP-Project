@@ -20,7 +20,11 @@ public abstract class Bird {
     protected float launchAngle;
     protected float pullDistance;
 
-    public Bird(String texturePath, float x, float y) {
+    // New attributes for power and damage
+    protected float power;       // Damage strength of the bird
+    protected float birdVelocity; // Initial launch velocity
+
+    public Bird(String texturePath, float x, float y, float power, float birdVelocity) {
         this.texture = new Texture(texturePath);
         this.position = new Vector2(x, y);
         this.originalPosition = new Vector2(x-20, y);
@@ -30,6 +34,10 @@ public abstract class Bird {
         this.isLaunched = false;
         this.launchAngle = 0;
         this.pullDistance = 0;
+
+        // Set power and velocity
+        this.power = power;
+        this.birdVelocity = birdVelocity;
     }
 
 
@@ -96,9 +104,20 @@ public abstract class Bird {
         return velocity;
     }
 
-    public abstract int getStrengthAgainst(String material);
 
     public void setPosition(float lerp, float lerp1) {
         this.position.set(lerp, lerp1);
     }
+
+    // Method to get bird's damage power
+    public float getPower() {
+        return power;
+    }
+
+    // Method to get bird's initial velocity
+    public float getBirdVelocity() {
+        return birdVelocity;
+    }
+
+    public abstract int getStrengthAgainst(String material);
 }

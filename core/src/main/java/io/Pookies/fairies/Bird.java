@@ -2,51 +2,47 @@ package io.Pookies.fairies;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.utils.Disposable;
 
-public abstract class Bird {
-    protected Texture texture;
-    protected Vector2 position;
+public abstract class Bird extends Image implements Disposable {
     protected Vector2 velocity;
     protected Vector2 originalPosition;
     protected Vector2 slingshotPosition;
     protected boolean isDragging;
     protected boolean isLaunched;
-    protected static final float GRAVITY = 980f; // Gravity scaled for game units
+    protected static final float GRAVITY = 980f;
     protected static final float LAUNCH_SPEED_MULTIPLIER = 8f;
     protected static final float MAX_PULL_DISTANCE = 150f;
     protected float launchAngle;
     protected float pullDistance;
-
-    // New attributes for power and damage
-    protected float power;       // Damage strength of the bird
-    protected float birdVelocity; // Initial launch velocity
+    protected float power;
+    protected float birdVelocity;
+    protected Texture birdTexture;
 
     public Bird(String texturePath, float x, float y, float power, float birdVelocity) {
-        this.texture = new Texture(texturePath);
-        this.position = new Vector2(x, y);
-        this.originalPosition = new Vector2(x-20, y);
+        this.birdTexture = new Texture(Gdx.files.internal(texturePath));
+        super.setDrawable(new TextureRegionDrawable(new TextureRegion(birdTexture)));
+
         this.velocity = new Vector2(0, 0);
+        this.originalPosition = new Vector2(x-20, y);
         this.slingshotPosition = new Vector2(x, y);
         this.isDragging = false;
         this.isLaunched = false;
         this.launchAngle = 0;
         this.pullDistance = 0;
-
-        // Set power and velocity
         this.power = power;
         this.birdVelocity = birdVelocity;
+
+        setPosition(x, y);
+        setSize(birdTexture.getWidth(), birdTexture.getHeight());
     }
 
-
-    public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x, position.y);
-    }
-
-    public Texture getCurrentTexture() {
-        return texture;
+    public Texture getTexture() {
+        return birdTexture;
     }
 
     public void startDragging() {
@@ -57,7 +53,7 @@ public abstract class Bird {
 
     public void drag(float x, float y) {
         if (isDragging) {
-            position.set(x, y);
+            setPosition(x, y);
         }
     }
 
@@ -67,56 +63,56 @@ public abstract class Bird {
         velocity.set(velocityX, velocityY);
     }
 
-
     public void reset() {
-        position.set(originalPosition);
+        setPosition(originalPosition.x, originalPosition.y);
         velocity.set(0, 0);
         isLaunched = false;
         isDragging = false;
         launchAngle = 0;
         pullDistance = 0;
     }
+
     public void update(float delta) {
         if (isLaunched) {
-            // Apply gravity
             velocity.y -= GRAVITY * delta;
-
-            // Update position
-            position.x += velocity.x * delta;
-            position.y += velocity.y * delta;
+            setPosition(getX() + velocity.x * delta, getY() + velocity.y * delta);
         }
     }
 
     public boolean contains(float x, float y) {
-        return x >= position.x && x <= position.x + texture.getWidth() &&
-            y >= position.y && y <= position.y + texture.getHeight();
+        return x >= getX() && x <= getX() + getWidth() &&
+            y >= getY() && y <= getY() + getHeight();
     }
 
+    @Override
     public void dispose() {
-        if (texture != null) texture.dispose();
+        if (birdTexture != null) {
+            birdTexture.dispose();
+        }
     }
 
     public Vector2 getPosition() {
-        return position;
+        return new Vector2(getX(), getY());
     }
 
     public Vector2 getVelocity() {
         return velocity;
     }
 
-
-    public void setPosition(float lerp, float lerp1) {
-        this.position.set(lerp, lerp1);
+    public void setPosition(Vector2 position) {
+        super.setPosition(position.x, position.y);
     }
 
-    // Method to get bird's damage power
     public float getPower() {
         return power;
     }
 
-    // Method to get bird's initial velocity
     public float getBirdVelocity() {
         return birdVelocity;
+    }
+
+    public Texture getCurrentTexture() {
+        return birdTexture;
     }
 
     public abstract int getStrengthAgainst(String material);

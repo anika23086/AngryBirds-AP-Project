@@ -17,7 +17,7 @@ public class LevelScreen_3 implements Screen {
     private final Game game;
     private SpriteBatch batch;
     private Texture level2game;
-    private PurpleBird purplebird;
+    private Bird purpleBird;
     private boolean levelCompleted = false;
     private Stage stage;
     private Texture pauseButtonTexture;
@@ -30,7 +30,12 @@ public class LevelScreen_3 implements Screen {
         this.game = game;
         ((Main) game).setCurrentLevel(this);
         batch = new SpriteBatch();
-        purplebird = new PurpleBird(30, 80);
+        purpleBird = new PurpleBird(30, 80) {
+            @Override
+            public int getStrengthAgainst(String material) {
+                return 0;
+            }
+        };
         bubblePig1 = new BubblePig(885, 380);
         bubblePig2 = new BubblePig(1130, 275);
         stoneStructure1 = new StoneStructure(1015, 380);
@@ -65,7 +70,7 @@ public class LevelScreen_3 implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         batch.begin();
         batch.draw(level2game, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        purplebird.render(batch);
+        purpleBird.draw(batch,3);
         bubblePig1.render(batch);
         bubblePig2.render(batch);
         stoneStructure1.render(batch);
@@ -107,7 +112,7 @@ public class LevelScreen_3 implements Screen {
         level2game.dispose();
         if (stage != null) stage.dispose();
         if (pauseButtonTexture != null) pauseButtonTexture.dispose();
-        purplebird.dispose();
+        purpleBird.dispose();
         bubblePig1.dispose();
         bubblePig2.dispose();
         stoneStructure1.dispose();

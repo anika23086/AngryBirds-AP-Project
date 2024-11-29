@@ -200,7 +200,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
             // Draw other game elements
             if (!birdDestroyed) {
-                pinkBird.render(batch);
+                pinkBird.draw(batch,1);
             }
             if (!pigDestroyed) {
                 bubblePig.render(batch);

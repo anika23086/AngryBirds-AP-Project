@@ -23,8 +23,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private Stage stage;
     private SpriteBatch batch;
     private Texture levelBackground;
-    PinkBird pinkBird;
-    BubblePig bubblePig;
+    public PinkBird pinkBird;
+    public BubblePig bubblePig;
     private StoneStructure stoneStructure1, stoneStructure2;
     private Slingshot slingshot;
     private float clickSoundVolume;
@@ -35,17 +35,17 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private float launchPower;
     private float launchAngle;
     private ShapeRenderer shapeRenderer;
-    boolean pigDestroyed = false;
-    boolean stoneStructure1Destroyed = false;
-    boolean stoneStructure2Destroyed = false;
-    boolean birdDestroyed = false;
+    public boolean pigDestroyed = false;
+    public boolean stoneStructure1Destroyed = false;
+    public boolean stoneStructure2Destroyed = false;
+    public boolean birdDestroyed = false;
     private Rectangle birdRectangle;
     private Rectangle pigRectangle;
     private BitmapFont scoreFont;
     private int currentScore;
     private static final int PIG_POINTS = 200;
     private static final int STRUCTURE_POINTS = 100;
-    boolean levelComplete = false;
+    public boolean levelComplete = false;
     private float levelCompleteTimer = 0;
     private static final float LEVEL_COMPLETE_DELAY = 1.0f;
     private boolean checkingForFailure = false;
@@ -66,9 +66,9 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private Rectangle pauseButtonBounds;
     private static final int PAUSE_BUTTON_SIZE = 50;
     private static final int PADDING = 10;
-    boolean failureTriggered = false;
+    public boolean failureTriggered = false;
     private static final int MAX_BIRDS = 1; // Adjust based on the number of birds
-    int birdsUsed = 0;              // Track how many birds have been used
+    public int birdsUsed = 0;              // Track how many birds have been used
 
 
     public LevelScreen_1(Game game) {
@@ -287,7 +287,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         }
     }
 
-    void checkForFailureConditions(float delta) {
+    public void checkForFailureConditions(float delta) {
         failureCheckTimer += delta;
 
         if (failureCheckTimer >= FAILURE_CHECK_DELAY) {
@@ -401,7 +401,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         return false;
     }
 
-    void handlePigCollision() {
+    public void handlePigCollision() {
         bubblePig.takeHit(pinkBird);
         if (bubblePig.getCurrentHealth() <= 0) {
             if (!pigDestroyed) {
@@ -421,7 +421,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         }
     }
 
-    void handleStructureCollision(int structureNumber) {
+    public void handleStructureCollision(int structureNumber) {
         if (structureNumber == 1 && !stoneStructure1Destroyed) {
             stoneStructure1.takeHit(pinkBird);
             if (stoneStructure1.getCurrentDurability() <= 0) {

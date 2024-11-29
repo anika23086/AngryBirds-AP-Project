@@ -24,6 +24,19 @@ dependencies {
   implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
   implementation "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
 
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+  testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+
+  // Add this line - JUnit Platform Runner
+  testImplementation 'org.junit.platform:junit-platform-runner:1.8.2'
+
+  // Mockito dependency
+  testImplementation 'org.mockito:mockito-core:4.6.1'
+
+  // Add this - Mockito JUnit Jupiter support
+  testImplementation 'org.mockito:mockito-junit-jupiter:4.6.1'
+
+
   // Optional: Graal Native support
   if (enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"

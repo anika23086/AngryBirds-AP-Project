@@ -75,9 +75,9 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     private static final int PAUSE_BUTTON_SIZE = 50;
     private static final int PADDING = 10;
 
-    private List<Bird> birds = new ArrayList<>();  // List to hold your birds
-    private int currentBirdIndex = 0;    // Keeps track of the active bird
-    private Bird currentBird;            // The bird that's currently ready to be launched
+    private List<Bird> birds = new ArrayList<>();
+    private int currentBirdIndex = 0;
+    private Bird currentBird;
 
     public LevelScreen_2(Game game) {
         this.game = game;
@@ -160,14 +160,12 @@ public class LevelScreen_2 implements Screen, InputProcessor {
         Gdx.app.log("LevelScreen_2", "Pause button added to stage");
         Gdx.app.log("LevelScreen_2", "Pause button position: (" + pauseButton.getX() + ", " + pauseButton.getY() + "), size: (" + pauseButton.getWidth() + ", " + pauseButton.getHeight() + ")");
 
-        // Initialize the birds
-        birds.add(new PurpleBird(150, 240)); // First bird, purple
-        birds.add(new PinkBird(150, 240));   // Second bird, pink
-        birds.add(new PinkBird(150, 240));   // Third bird, pink
+        birds.add(new PurpleBird(150, 240));
+        birds.add(new PinkBird(150, 240));
+        birds.add(new PinkBird(150, 240));
 
-        // Set the first bird as the current bird
         currentBird = birds.get(0);
-        currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y); // Initial position at the slingshot
+        currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y);
     }
 
     @Override
@@ -362,70 +360,195 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     }
 
     private void checkCollisions() {
-        if (!pigDestroyed1 && birdRectangle.overlaps(pigRectangle1)) {
+        // First, check pig collision (prioritize pig over structures)
+        if (!pigDestroyed1 && isColliding(currentBird, unclePig1)) {
             handlePigCollision(1);
+            return;
         }
-        if (!pigDestroyed2 && birdRectangle.overlaps(pigRectangle2)) {
+        if (!pigDestroyed2 && isColliding(currentBird, bubblePig1)) {
             handlePigCollision(2);
+            return;
         }
 
-        if (!woodStructureDestroyed && birdRectangle.overlaps(woodStructureRectangle)) {
+        // Then check structure collisions
+        if (!woodStructureDestroyed && isColliding(currentBird, woodStructure1)) {
             handleStructureCollision(1);
         }
-        if (!iceStructureDestroyed1 && birdRectangle.overlaps(iceStructureRectangle1)) {
+        if (!iceStructureDestroyed1 && isColliding(currentBird, icestructure1)) {
             handleStructureCollision(2);
         }
-        if (!iceStructureDestroyed2 && birdRectangle.overlaps(iceStructureRectangle2)) {
+        if (!iceStructureDestroyed2 && isColliding(currentBird, icestructure2)) {
             handleStructureCollision(3);
         }
     }
 
-    private void handlePigCollision(int pigNumber) {
-        if (pigNumber == 1 && !pigDestroyed1) {
-            pigDestroyed1 = true;
-            birdDestroyed = true;
-            currentScore += PIG_POINTS;
-            System.out.println("Pig 1 hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+    private boolean isColliding(Object obj1, Object obj2) {
+        if (obj1 instanceof Bird && obj2 instanceof BubblePig) {
+            Bird bird = (Bird) obj1;
+            BubblePig pig = (BubblePig) obj2;
 
-            sparklePosition.set(unclePig1.getPosition());
-            sparkleTimer = SPARKLE_DURATION;
-            sparkleAlpha = 1.0f;
+            Vector2 birdPos = bird.getPosition();
+            Vector2 pigPos = pig.getPosition();
 
-            // Do not set levelComplete to true here
-        } else if (pigNumber == 2 && !pigDestroyed2) {
-            pigDestroyed2 = true;
-            birdDestroyed = true;
-            currentScore += PIG_POINTS;
-            System.out.println("Pig 2 hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+            Texture birdTexture = bird.getCurrentTexture();
+            Texture pigTexture = pig.getCurrentTexture();
 
-            sparklePosition.set(bubblePig1.getPosition());
-            sparkleTimer = SPARKLE_DURATION;
-            sparkleAlpha = 1.0f;
+            Rectangle birdRect = new Rectangle(
+                birdPos.x,
+                birdPos.y,
+                birdTexture.getWidth(),
+                birdTexture.getHeight()
+            );
 
-            // Do not set levelComplete to true here
+            Rectangle pigRect = new Rectangle(
+                pigPos.x,
+                pigPos.y,
+                pigTexture.getWidth(),
+                pigTexture.getHeight()
+            );
+
+            return birdRect.overlaps(pigRect);
         }
 
-        // Check if both pigs are destroyed
-        if (pigDestroyed1 && pigDestroyed2) {
-            levelComplete = true;
-            LevelScreen.level2Completed = true;
+        if (obj1 instanceof Bird && obj2 instanceof WoodStructure) {
+            Bird bird = (Bird) obj1;
+            WoodStructure structure = (WoodStructure) obj2;
+
+            Vector2 birdPos = bird.getPosition();
+            Vector2 structurePos = structure.getPosition();
+
+            Texture birdTexture = bird.getCurrentTexture();
+            Texture structureTexture = structure.getCurrentTexture();
+
+            Rectangle birdRect = new Rectangle(
+                birdPos.x,
+                birdPos.y,
+                birdTexture.getWidth(),
+                birdTexture.getHeight()
+            );
+
+            Rectangle structureRect = new Rectangle(
+                structurePos.x,
+                structurePos.y,
+                structureTexture.getWidth(),
+                structureTexture.getHeight()
+            );
+
+            return birdRect.overlaps(structureRect);
+        }
+
+        if (obj1 instanceof Bird && obj2 instanceof IceStructure) {
+            Bird bird = (Bird) obj1;
+            IceStructure structure = (IceStructure) obj2;
+
+            Vector2 birdPos = bird.getPosition();
+            Vector2 structurePos = structure.getPosition();
+
+            Texture birdTexture = bird.getCurrentTexture();
+            Texture structureTexture = structure.getCurrentTexture();
+
+            Rectangle birdRect = new Rectangle(
+                birdPos.x,
+                birdPos.y,
+                birdTexture.getWidth(),
+                birdTexture.getHeight()
+            );
+
+            Rectangle structureRect = new Rectangle(
+                structurePos.x,
+                structurePos.y,
+                structureTexture.getWidth(),
+                structureTexture.getHeight()
+            );
+
+            return birdRect.overlaps(structureRect);
+        }
+
+        return false;
+    }
+
+    private void handlePigCollision(int pigNumber) {
+        if (pigNumber == 1 && !pigDestroyed1) {
+            unclePig1.takeHit(currentBird);
+            if (unclePig1.getCurrentHealth() <= 0) {
+                if (!pigDestroyed1) {
+                    pigDestroyed1 = true;
+                    birdDestroyed = true;
+                    currentScore += PIG_POINTS;
+                    System.out.println("Pig 1 hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+
+                    sparklePosition.set(unclePig1.getPosition());
+                    sparkleTimer = SPARKLE_DURATION;
+                    sparkleAlpha = 1.0f;
+
+                    if (pigDestroyed1 && pigDestroyed2) {
+                        levelComplete = true;
+                        LevelScreen.level2Completed = true;
+                    }
+                }
+            } else {
+                birdDestroyed = true;
+            }
+        } else if (pigNumber == 2 && !pigDestroyed2) {
+            bubblePig1.takeHit(currentBird);
+            if (bubblePig1.getCurrentHealth() <= 0) {
+                if (!pigDestroyed2) {
+                    pigDestroyed2 = true;
+                    birdDestroyed = true;
+                    currentScore += PIG_POINTS;
+                    System.out.println("Pig 2 hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+
+                    sparklePosition.set(bubblePig1.getPosition());
+                    sparkleTimer = SPARKLE_DURATION;
+                    sparkleAlpha = 1.0f;
+
+                    if (pigDestroyed1 && pigDestroyed2) {
+                        levelComplete = true;
+                        LevelScreen.level2Completed = true;
+                    }
+                }
+            } else {
+                birdDestroyed = true;
+            }
         }
     }
 
     private void handleStructureCollision(int structureNumber) {
         switch (structureNumber) {
             case 1:
-                woodStructureDestroyed = true;
+                woodStructure1.takeHit(currentBird);
+                if (woodStructure1.getCurrentDurability() <= 0) {
+                    woodStructureDestroyed = true;
+                    birdDestroyed = true;
+                    currentScore += STRUCTURE_POINTS;
+                    System.out.println("Wood Structure hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+                } else {
+                    birdDestroyed = true;
+                }
                 break;
             case 2:
-                iceStructureDestroyed1 = true;
+                icestructure1.takeHit(currentBird);
+                if (icestructure1.getCurrentDurability() <= 0) {
+                    iceStructureDestroyed1 = true;
+                    birdDestroyed = true;
+                    currentScore += STRUCTURE_POINTS;
+                    System.out.println("Ice Structure 1 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+                } else {
+                    birdDestroyed = true;
+                }
                 break;
             case 3:
-                iceStructureDestroyed2 = true;
+                icestructure2.takeHit(currentBird);
+                if (icestructure2.getCurrentDurability() <= 0) {
+                    iceStructureDestroyed2 = true;
+                    birdDestroyed = true;
+                    currentScore += STRUCTURE_POINTS;
+                    System.out.println("Ice Structure 2 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+                } else {
+                    birdDestroyed = true;
+                }
                 break;
         }
-        currentScore += STRUCTURE_POINTS;
-        System.out.println("Structure hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
     }
 
     @Override
@@ -472,7 +595,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         if (dragStart != null) {
-            // Launch the current bird
             Vector2 touchPos = new Vector2(screenX, screenY);
             Vector2 dragVector = new Vector2(dragStart.x - touchPos.x, dragStart.y - touchPos.y);
             float dragDistance = dragVector.len();
@@ -480,19 +602,17 @@ public class LevelScreen_2 implements Screen, InputProcessor {
 
             float velocityMultiplier = 2000f;
 
-            // Calculate launch velocity
             float launchSpeedX = (float) (launchPower * Math.cos(launchAngle) * velocityMultiplier);
             float launchSpeedY = (float) (launchPower * Math.sin(launchAngle) * velocityMultiplier);
 
-            currentBird.launch(launchSpeedX, launchSpeedY);  // Launch the current bird
+            currentBird.launch(launchSpeedX, launchSpeedY);
             gameStarted = true;
             dragStart = null;
 
-            // Move to the next bird in the sequence after the current one is launched
             currentBirdIndex = (currentBirdIndex + 1) % birds.size();
-            currentBird = birds.get(currentBirdIndex);  // Set the next bird as the current one
-            currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y);  // Position it at the slingshot
-            currentBird.reset();  // Reset the bird's state for the next round
+            currentBird = birds.get(currentBirdIndex);
+            currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y);
+            currentBird.reset();
         }
         return true;
     }

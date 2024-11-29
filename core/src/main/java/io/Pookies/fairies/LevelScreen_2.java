@@ -327,7 +327,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             Gdx.app.postRunnable(() -> {
                 try {
                     dispose();
-                    game.setScreen(new FailureScreen(game));
+                    game.setScreen(new FailureScreen(game, 2));
                 } catch (Exception e) {
                     Gdx.app.error("LevelScreen_2", "Failed to show failure screen", e);
                     Gdx.app.exit();
@@ -353,7 +353,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             boolean hasStopped = birdVelocity.len() < VELOCITY_THRESHOLD;
 
             if ((isOffScreen || hasStopped) && !(pigDestroyed1 && pigDestroyed2)) {
-                game.setScreen(new FailureScreen(game));
+                game.setScreen(new FailureScreen(game,2));
             }
         }
     }

@@ -50,7 +50,7 @@ public class Main extends Game {
             Gdx.app.error("Main", "Error during game initialization", e);
             safeCleanup();
             try {
-                setScreen(new FailureScreen(this));
+                setScreen(new FailureScreen(this,1));
             } catch (Exception screenError) {
                 Gdx.app.error("Main", "Failed to show failure screen", screenError);
                 Gdx.app.exit();

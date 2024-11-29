@@ -310,7 +310,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             Gdx.app.postRunnable(() -> {
                 try {
                     dispose(); // Clean up resources
-                    game.setScreen(new FailureScreen(game));
+                    game.setScreen(new FailureScreen(game, 1));
                 } catch (Exception e) {
                     Gdx.app.error("LevelScreen_1", "Failed to show failure screen", e);
                     Gdx.app.exit();
@@ -339,7 +339,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
             // If bird is off screen or has stopped without hitting the pig, transition to failure screen
             if ((isOffScreen || hasStopped) && !pigDestroyed) {
-                game.setScreen(new FailureScreen(game));
+                game.setScreen(new FailureScreen(game, 1));
             }
         }
     }

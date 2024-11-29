@@ -18,7 +18,7 @@ public class NativeCrashHandler implements Thread.UncaughtExceptionHandler {
         // Post the screen transition to the main thread
         Gdx.app.postRunnable(() -> {
             try {
-                game.setScreen(new FailureScreen(game));
+                game.setScreen(new FailureScreen(game,1));
             } catch (Exception e) {
                 Gdx.app.error("NativeCrashHandler", "Failed to show failure screen", e);
                 // Force exit if we can't show the failure screen

@@ -21,9 +21,11 @@ public class FailureScreen implements Screen {
     private ImageButton exitButton;
     private ImageButton menuButton;
     private ImageButton retryButton;
+    private final int failedLevel;
 
-    public FailureScreen(Game game) {
+    public FailureScreen(Game game, int levelNumber) {
         this.game = game;
+        this.failedLevel = levelNumber;
     }
 
     @Override
@@ -79,8 +81,23 @@ public class FailureScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                System.out.println("Retry button clicked!");
-                game.setScreen(new LevelScreen_1(game));
+                System.out.println("Retrying level " + failedLevel);
+                // Use the stored level number to return to the correct level
+                switch (failedLevel) {
+                    case 1:
+                        game.setScreen(new LevelScreen_1(game));
+                        break;
+                    case 2:
+                        game.setScreen(new LevelScreen_2(game));
+                        break;
+                    case 3:
+                        game.setScreen(new LevelScreen_3(game));
+                        break;
+                    // Add more cases for additional levels
+                    default:
+                        game.setScreen(new LevelScreen(game));
+                        break;
+                }
             }
         });
     }

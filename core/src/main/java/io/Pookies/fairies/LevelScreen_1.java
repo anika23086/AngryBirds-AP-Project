@@ -23,8 +23,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private Stage stage;
     private SpriteBatch batch;
     private Texture levelBackground;
-    private PinkBird pinkBird;
-    private BubblePig bubblePig;
+    PinkBird pinkBird;
+    BubblePig bubblePig;
     private StoneStructure stoneStructure1, stoneStructure2;
     private Slingshot slingshot;
     private float clickSoundVolume;
@@ -35,17 +35,17 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private float launchPower;
     private float launchAngle;
     private ShapeRenderer shapeRenderer;
-    private boolean pigDestroyed = false;
-    private boolean stoneStructure1Destroyed = false;
-    private boolean stoneStructure2Destroyed = false;
-    private boolean birdDestroyed = false;
+    boolean pigDestroyed = false;
+    boolean stoneStructure1Destroyed = false;
+    boolean stoneStructure2Destroyed = false;
+    boolean birdDestroyed = false;
     private Rectangle birdRectangle;
     private Rectangle pigRectangle;
     private BitmapFont scoreFont;
     private int currentScore;
     private static final int PIG_POINTS = 200;
     private static final int STRUCTURE_POINTS = 100;
-    private boolean levelComplete = false;
+    boolean levelComplete = false;
     private float levelCompleteTimer = 0;
     private static final float LEVEL_COMPLETE_DELAY = 1.0f;
     private boolean checkingForFailure = false;
@@ -66,6 +66,10 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private Rectangle pauseButtonBounds;
     private static final int PAUSE_BUTTON_SIZE = 50;
     private static final int PADDING = 10;
+    boolean failureTriggered = false;
+    private static final int MAX_BIRDS = 1; // Adjust based on the number of birds
+    int birdsUsed = 0;              // Track how many birds have been used
+
 
     public LevelScreen_1(Game game) {
         this.game = game;
@@ -158,6 +162,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             batch.begin();
             batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
+            // Check for level completion
             if (levelComplete) {
                 levelCompleteTimer += delta;
                 if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
@@ -169,32 +174,19 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 }
             }
 
-            // Sparkle timer and alpha management
-            if (sparkleTimer > 0) {
-                sparkleTimer -= delta;
-                sparkleAlpha = Math.max(0, sparkleTimer / SPARKLE_DURATION); // Fade out effect
-            }
-
-            if (pigDestroyed || (stoneStructure1Destroyed && stoneStructure2Destroyed)) {
-                levelCompleteTimer += delta;
-                if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
-                    checkLevelCompletion();
+            if (gameStarted && !levelComplete) {
+                if (!checkingForFailure) {
+                    checkingForFailure = true;
                 }
-            }
-
-            if (gameStarted && !levelComplete && !checkingForFailure) {
-                checkingForFailure = true;
-            }
-
-            if (checkingForFailure && !pigDestroyed) {
                 checkForFailureConditions(delta);
             }
 
+            // Render pig and bird updates
             if (gameStarted && !pigDestroyed) {
                 bubblePig.update(delta);
                 pigRectangle.setPosition(bubblePig.getPosition().x, bubblePig.getPosition().y);
 
-                // Check if pig falls below screen
+                // Check if pig falls below the screen
                 if (bubblePig.getPosition().y < -100) {
                     pigDestroyed = true;
                 }
@@ -206,15 +198,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 checkCollisions();
             }
 
-            batch.draw(simplePauseTexture,
-                pauseButtonBounds.x,
-                pauseButtonBounds.y,
-                pauseButtonBounds.width,
-                pauseButtonBounds.height);
-
-            stage.act(delta);
-            stage.draw();
-
+            // Draw other game elements
             if (!birdDestroyed) {
                 pinkBird.render(batch);
             }
@@ -222,9 +206,11 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 bubblePig.render(batch);
             }
 
-            // Render sparkles when timer is active
+            // Render sparkles
             if (sparkleTimer > 0) {
-                batch.setColor(1, 1, 1, sparkleAlpha); // Adjust transparency
+                sparkleTimer -= delta;
+                sparkleAlpha = Math.max(0, sparkleTimer / SPARKLE_DURATION);
+                batch.setColor(1, 1, 1, sparkleAlpha);
                 batch.draw(sparkleTexture, sparklePosition.x, sparklePosition.y, 100, 100);
                 batch.setColor(1, 1, 1, 1); // Reset color
             }
@@ -238,15 +224,30 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
             slingshot.render(batch);
 
-            // Render score counter below the level 1 board
+            // Render score counter
             scoreFont.draw(batch, "Score: " + currentScore, 40, Gdx.graphics.getHeight() - 115);
-
-
 
             batch.end();
 
+            stage.act(delta);
+            stage.draw();
         } catch (Throwable t) {
             handleCrash(t);
+        }
+    }
+
+    private void triggerFailure() {
+        if (!failureTriggered) {
+            failureTriggered = true;
+            Gdx.app.log("LevelScreen_1", "Triggering Failure Screen");
+
+            Gdx.app.postRunnable(() -> {
+                try {
+                    game.setScreen(new FailureScreen(game, 1));
+                } catch (Exception e) {
+                    Gdx.app.error("LevelScreen_1", "Error switching to failure screen", e);
+                }
+            });
         }
     }
 
@@ -263,38 +264,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             birdRectangle.setPosition(pinkBird.getPosition().x, pinkBird.getPosition().y);
             checkCollisions();
         } catch (Throwable t) {
-            handleCrash(t);
-        }
-    }
-
-    private void renderGameElements() {
-        try {
-            batch.begin();
-            batch.draw(levelBackground, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-            if (!birdDestroyed) {
-                pinkBird.render(batch);
-            }
-            if (!pigDestroyed) {
-                bubblePig.render(batch);
-            }
-
-            // Render stone structures individually based on their destroyed status
-            if (!stoneStructure1Destroyed) {
-                stoneStructure1.render(batch);
-            }
-            if (!stoneStructure2Destroyed) {
-                stoneStructure2.render(batch);
-            }
-
-            slingshot.render(batch);
-            scoreFont.draw(batch, "Score: " + currentScore, 10, Gdx.graphics.getHeight() - 100);
-
-            batch.end();
-        } catch (Throwable t) {
-            if (batch != null && batch.isDrawing()) {
-                batch.end();
-            }
             handleCrash(t);
         }
     }
@@ -318,24 +287,35 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         }
     }
 
-    private void checkForFailureConditions(float delta) {
+    void checkForFailureConditions(float delta) {
         failureCheckTimer += delta;
 
         if (failureCheckTimer >= FAILURE_CHECK_DELAY) {
-            // Check if bird is off screen
-            Vector2 birdPos = pinkBird.getPosition();
-            boolean isOffScreen = birdPos.x < -SCREEN_BOUNDS_MARGIN ||
-                birdPos.x > Gdx.graphics.getWidth() + SCREEN_BOUNDS_MARGIN ||
-                birdPos.y < -SCREEN_BOUNDS_MARGIN ||
-                birdPos.y > Gdx.graphics.getHeight() + SCREEN_BOUNDS_MARGIN;
+            // Reset timer for periodic checking
+            failureCheckTimer = 0;
 
-            // Check if bird has stopped moving (get velocity from your PinkBird class)
-            Vector2 birdVelocity = pinkBird.getVelocity();
-            boolean hasStopped = birdVelocity.len() < VELOCITY_THRESHOLD;
+            if (gameStarted && !levelComplete) {
+                Vector2 birdPos = pinkBird.getPosition();
+                Vector2 birdVelocity = pinkBird.getVelocity();
 
-            // If bird is off screen or has stopped without hitting the pig, transition to failure screen
-            if ((isOffScreen || hasStopped) && !pigDestroyed) {
-                game.setScreen(new FailureScreen(game, 1));
+                boolean isOffScreen = birdPos.x < -SCREEN_BOUNDS_MARGIN ||
+                    birdPos.x > Gdx.graphics.getWidth() + SCREEN_BOUNDS_MARGIN ||
+                    birdPos.y < -SCREEN_BOUNDS_MARGIN ||
+                    birdPos.y > Gdx.graphics.getHeight() + SCREEN_BOUNDS_MARGIN;
+
+                boolean hasStopped = birdVelocity.len() < VELOCITY_THRESHOLD;
+
+                // If bird is off screen or stopped, consider it used
+                if ((isOffScreen || hasStopped) && !birdDestroyed) {
+                    birdDestroyed = true; // Mark the bird as used
+                    birdsUsed++;          // Increment bird counter
+                    Gdx.app.log("LevelScreen_1", "Bird destroyed. Birds used: " + birdsUsed);
+                }
+
+                // Check failure condition: all birds used and pig still alive
+                if (birdsUsed >= MAX_BIRDS && !pigDestroyed) {
+                    triggerFailure();
+                }
             }
         }
     }
@@ -421,66 +401,47 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         return false;
     }
 
-    private void handlePigCollision() {
-        //
-
-        // Reduce pig's health
+    void handlePigCollision() {
         bubblePig.takeHit(pinkBird);
-
-        // Check if pig is destroyed
         if (bubblePig.getCurrentHealth() <= 0) {
-            if (!pigDestroyed) {  // Check to prevent multiple score additions
+            if (!pigDestroyed) {
                 pigDestroyed = true;
                 birdDestroyed = true;
                 currentScore += PIG_POINTS;
-                System.out.println("Pig hit! Score +" + PIG_POINTS + " (Total: " + currentScore + ")");
+                Gdx.app.log("LevelScreen_1", "Pig hit! Score +" + PIG_POINTS);
 
-                // Set sparkle position to pig's current position
                 sparklePosition.set(bubblePig.getPosition());
                 sparkleTimer = SPARKLE_DURATION;
-                sparkleAlpha = 1.0f;  // Reset alpha for full opacity
-
                 levelComplete = true;
                 LevelScreen.level1Completed = true;
             }
         } else {
-            // Bird is destroyed after hitting the pig
-            birdDestroyed = true;
+            birdDestroyed = true; // Mark bird as used even if the pig isn't destroyed
+            birdsUsed++;
         }
     }
 
-    private void handleStructureCollision(int structureNumber) {
-
+    void handleStructureCollision(int structureNumber) {
         if (structureNumber == 1 && !stoneStructure1Destroyed) {
-            // Reduce structure's health
             stoneStructure1.takeHit(pinkBird);
-
-            // Check if structure is destroyed
             if (stoneStructure1.getCurrentDurability() <= 0) {
                 stoneStructure1Destroyed = true;
-                birdDestroyed = true;
                 currentScore += STRUCTURE_POINTS;
-                System.out.println("Structure 1 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
-            } else {
-                birdDestroyed = true;
+                Gdx.app.log("LevelScreen_1", "Structure 1 destroyed! Score +" + STRUCTURE_POINTS);
             }
-        }
-        else if (structureNumber == 2 && !stoneStructure2Destroyed) {
-            // Reduce structure's health
+            birdDestroyed = true; // Mark bird as used
+            birdsUsed++;
+        } else if (structureNumber == 2 && !stoneStructure2Destroyed) {
             stoneStructure2.takeHit(pinkBird);
-
-            // Check if structure is destroyed
             if (stoneStructure2.getCurrentDurability() <= 0) {
                 stoneStructure2Destroyed = true;
-                birdDestroyed = true;
                 currentScore += STRUCTURE_POINTS;
-                System.out.println("Structure 2 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
-            } else {
-                birdDestroyed = true;
+                Gdx.app.log("LevelScreen_1", "Structure 2 destroyed! Score +" + STRUCTURE_POINTS);
             }
+            birdDestroyed = true; // Mark bird as used
+            birdsUsed++;
         }
     }
-
 
 
     @Override
@@ -544,11 +505,11 @@ public class LevelScreen_1 implements Screen, InputProcessor {
 
             // Calculate drag distance and launch power
             float dragDistance = dragVector.len();
-            float maxDragDistance = 200f; // Define your maximum allowable drag distance
+            float maxDragDistance = 200f;
             float launchPower = Math.min(dragDistance / maxDragDistance, 1f);
 
             // Adjust velocity multiplier
-            float velocityMultiplier = 2000f; // Scales the launch velocity
+            float velocityMultiplier = 2000f;
 
             // Calculate launch speed components
             float launchSpeedX = (float) (launchPower * Math.cos(launchAngle) * velocityMultiplier);
@@ -557,9 +518,11 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             // Launch the bird with calculated speed
             pinkBird.launch(launchSpeedX, launchSpeedY);
             gameStarted = true;
-            dragStart = null;
-            // Reset drag start
 
+            // Reset failure-related flags
+            failureTriggered = false;
+
+            dragStart = null;
         }
         return true;
     }
@@ -567,6 +530,8 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     public boolean touchCancelled(int i, int i1, int i2, int i3) {
         return false;
     }
+
+
 
     // Implement other InputProcessor methods (return false)
     @Override public boolean keyDown(int keycode) { return false; }

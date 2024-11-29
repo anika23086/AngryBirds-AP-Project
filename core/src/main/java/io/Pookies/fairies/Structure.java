@@ -23,4 +23,8 @@ public class Structure {
     public Vector2 getPosition() {
         return position;
     }
+
+    public Texture getCurrentTexture() {
+        return texture;
+    }
 }

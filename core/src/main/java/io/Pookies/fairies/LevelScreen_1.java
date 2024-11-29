@@ -37,11 +37,11 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     private ShapeRenderer shapeRenderer;
     private boolean showTrajectory;
     private boolean pigDestroyed = false;
-    private boolean structureDestroyed = false;
+    private boolean stoneStructure1Destroyed = false;
+    private boolean stoneStructure2Destroyed = false;
     private boolean birdDestroyed = false;
     private Rectangle birdRectangle;
     private Rectangle pigRectangle;
-    private Rectangle structureRectangle;
     private BitmapFont scoreFont;
     private int currentScore;
     private static final int PIG_POINTS = 200;
@@ -84,7 +84,6 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         showTrajectory = false;
         birdRectangle = new Rectangle(120, 200, 50, 50); // Use approximate sizes
         pigRectangle = new Rectangle(1090, 560, 50, 50);
-        structureRectangle = new Rectangle(1100, 100, 100, 200);
         scoreFont = new BitmapFont();
         scoreFont.setColor(Color.YELLOW);
         scoreFont.getData().setScale(3.0f); // Make the font larger
@@ -178,10 +177,10 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 sparkleAlpha = Math.max(0, sparkleTimer / SPARKLE_DURATION); // Fade out effect
             }
 
-            if (pigDestroyed && structureDestroyed) {
+            if (pigDestroyed || (stoneStructure1Destroyed && stoneStructure2Destroyed)) {
                 levelCompleteTimer += delta;
                 if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
-                    checkLevelCompletion(); // New method to check level completion
+                    checkLevelCompletion();
                 }
             }
 
@@ -232,10 +231,13 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                 batch.setColor(1, 1, 1, 1); // Reset color
             }
 
-            if (!structureDestroyed) {
+            if (!stoneStructure1Destroyed) {
                 stoneStructure1.render(batch);
+            }
+            if (!stoneStructure2Destroyed) {
                 stoneStructure2.render(batch);
             }
+
             slingshot.render(batch);
 
             // Render score counter below the level 1 board
@@ -280,12 +282,17 @@ public class LevelScreen_1 implements Screen, InputProcessor {
             if (!pigDestroyed) {
                 bubblePig.render(batch);
             }
-            if (!structureDestroyed) {
+
+            // Render stone structures individually based on their destroyed status
+            if (!stoneStructure1Destroyed) {
                 stoneStructure1.render(batch);
+            }
+            if (!stoneStructure2Destroyed) {
                 stoneStructure2.render(batch);
             }
+
             slingshot.render(batch);
-            scoreFont.draw(batch, "Score: " + currentScore, 10, Gdx.graphics.getHeight() - 100); // Move score counter below the level 1 board
+            scoreFont.draw(batch, "Score: " + currentScore, 10, Gdx.graphics.getHeight() - 100);
 
             batch.end();
         } catch (Throwable t) {
@@ -338,13 +345,84 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     }
 
     private void checkCollisions() {
-        if (!pigDestroyed && birdRectangle.overlaps(pigRectangle)) {
+        // First, check pig collision (prioritize pig over structures)
+        if (!pigDestroyed && isColliding(pinkBird, bubblePig)) {
             handlePigCollision();
+            return; // Exit early if pig is hit to prevent structure collision
         }
 
-        if (!structureDestroyed && birdRectangle.overlaps(structureRectangle)) {
-            handleStructureCollision();
+        // Then check structure collisions
+        if (!stoneStructure1Destroyed && isColliding(pinkBird, stoneStructure1)) {
+            handleStructureCollision(1);
         }
+
+        if (!stoneStructure2Destroyed && isColliding(pinkBird, stoneStructure2)) {
+            handleStructureCollision(2);
+        }
+    }
+
+    private boolean isColliding(Object obj1, Object obj2) {
+        if (obj1 instanceof Bird && obj2 instanceof BubblePig) {
+            Bird bird = (Bird) obj1;
+            BubblePig pig = (BubblePig) obj2;
+
+            // Get the current positions
+            Vector2 birdPos = bird.getPosition();
+            Vector2 pigPos = pig.getPosition();
+
+            // Get the textures
+            Texture birdTexture = bird.getCurrentTexture();
+            Texture pigTexture = pig.getCurrentTexture();
+
+            // Create rectangles for more precise collision detection
+            Rectangle birdRect = new Rectangle(
+                birdPos.x,
+                birdPos.y,
+                birdTexture.getWidth(),
+                birdTexture.getHeight()
+            );
+
+            Rectangle pigRect = new Rectangle(
+                pigPos.x,
+                pigPos.y,
+                pigTexture.getWidth(),
+                pigTexture.getHeight()
+            );
+
+            return birdRect.overlaps(pigRect);
+        }
+
+        if (obj1 instanceof Bird && obj2 instanceof Structure) {
+            Bird bird = (Bird) obj1;
+            Structure structure = (Structure) obj2;
+
+            // Get the current positions
+            Vector2 birdPos = bird.getPosition();
+            Vector2 structurePos = structure.getPosition();
+
+            // Get the textures
+            Texture birdTexture = bird.getCurrentTexture();
+            Texture structureTexture = structure.getCurrentTexture();
+
+            // More precise collision detection using rectangles
+            Rectangle birdRect = new Rectangle(
+                birdPos.x,
+                birdPos.y,
+                birdTexture.getWidth(),
+                birdTexture.getHeight()
+            );
+
+            Rectangle structureRect = new Rectangle(
+                structurePos.x,
+                structurePos.y,
+                structureTexture.getWidth(),
+                structureTexture.getHeight()
+            );
+
+            return birdRect.overlaps(structureRect);
+        }
+
+        return false;
     }
 
     private void handlePigCollision() {
@@ -364,12 +442,18 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         }
     }
 
-    private void handleStructureCollision() {
-        if (!structureDestroyed) {  // Check to prevent multiple score additions
-            structureDestroyed = true;
+    private void handleStructureCollision(int structureNumber) {
+        if (structureNumber == 1 && !stoneStructure1Destroyed) {
+            stoneStructure1Destroyed = true;
             birdDestroyed = true;
             currentScore += STRUCTURE_POINTS;
-            System.out.println("Structure hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+            System.out.println("Structure 1 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
+        }
+        else if (structureNumber == 2 && !stoneStructure2Destroyed) {
+            stoneStructure2Destroyed = true;
+            birdDestroyed = true;
+            currentScore += STRUCTURE_POINTS;
+            System.out.println("Structure 2 hit! Score +" + STRUCTURE_POINTS + " (Total: " + currentScore + ")");
         }
     }
 
@@ -490,18 +574,18 @@ public class LevelScreen_1 implements Screen, InputProcessor {
     }
 
     private void checkPigsOnDestroyedStructures() {
-        if (structureDestroyed) {
-            // Check if the pig is on or very close to the structure
+        if (stoneStructure1Destroyed) {
             Rectangle structureRect1 = new Rectangle(1100, 100, 100, 200);
-            Rectangle structureRect2 = new Rectangle(1100, 320, 100, 200);
-
-            // Check for Pig on Structure 1
             if (!pigDestroyed && isPigDirectlyAboveStructure(structureRect1)) {
                 handlePigFall();
             }
+        }
 
+        if (stoneStructure2Destroyed) {
+            Rectangle structureRect2 = new Rectangle(1100, 320, 100, 200);
             if (!pigDestroyed && isPigDirectlyAboveStructure(structureRect2)) {
-                handlePigFall();}
+                handlePigFall();
+            }
         }
     }
 

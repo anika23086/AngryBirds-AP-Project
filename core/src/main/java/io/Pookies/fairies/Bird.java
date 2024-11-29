@@ -37,7 +37,9 @@ public abstract class Bird {
         batch.draw(texture, position.x, position.y);
     }
 
-
+    public Texture getCurrentTexture() {
+        return texture;
+    }
 
     public void startDragging() {
         isDragging = true;

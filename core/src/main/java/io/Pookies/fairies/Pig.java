@@ -49,4 +49,8 @@ public class Pig {
     public boolean isFalling() {
         return isFalling;
     }
+
+    public Texture getCurrentTexture() {
+        return texture;
+    }
 }

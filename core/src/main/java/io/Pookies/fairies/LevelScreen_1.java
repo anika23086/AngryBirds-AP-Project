@@ -169,7 +169,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
                     if (!LevelScreen.level1Completed) {
                         LevelScreen.level1Completed = true;
                     }
-                    game.setScreen(new SuccessScreen(game));
+                    game.setScreen(new SuccessScreen(game,1));
                     return;
                 }
             }
@@ -255,7 +255,7 @@ public class LevelScreen_1 implements Screen, InputProcessor {
         if (!LevelScreen.level1Completed) {
             LevelScreen.level1Completed = true; // Mark level as completed
         }
-        game.setScreen(new SuccessScreen(game)); // Transition to success screen
+        game.setScreen(new SuccessScreen(game,1)); // Transition to success screen
     }
 
     private void updateBirdPosition(float delta) {

@@ -1,9 +1,9 @@
 package io.Pookies.fairies;
 
-public class KingPig extends Pig {
-    private static final String TEXTURE_PATH = "kingpig.png";
+public class BossPig extends Pig {
+    private static final String TEXTURE_PATH = "bosspig.png";
 
-    public KingPig(float x, float y) {
+    public BossPig(float x, float y) {
         super(TEXTURE_PATH, x, y);
         this.maxHealth = 4;
         this.currentHealth = maxHealth;

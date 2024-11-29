@@ -28,6 +28,7 @@ public class LevelScreen implements Screen {
 
     public static boolean level1Completed = false;
     public static boolean level2Completed = false;
+    public static boolean level3Completed = false;
 
     public LevelScreen(Game game) {
         this.game = game;
@@ -40,7 +41,6 @@ public class LevelScreen implements Screen {
 
         batch = new SpriteBatch();
 
-        // Load textures
         backgroundTexture = new Texture(Gdx.files.internal("levels_background.png"));
         level1ButtonTexture = new Texture(Gdx.files.internal("level1button.png"));
         level2ButtonTexture = new Texture(Gdx.files.internal("level2button.png"));
@@ -48,16 +48,13 @@ public class LevelScreen implements Screen {
         exitButtonTexture = new Texture(Gdx.files.internal("exit_button.png"));
         incompleteButtonTexture = new Texture(Gdx.files.internal("incompleteButton.png"));
 
-        // Create buttons
         level1Button = new ImageButton(new TextureRegionDrawable(new TextureRegion(level1ButtonTexture)));
 
-        // Dynamically set level 2 button texture based on level 1 completion
         TextureRegion level2Region = new TextureRegion(
             level1Completed ? level2ButtonTexture : incompleteButtonTexture
         );
         level2Button = new ImageButton(new TextureRegionDrawable(level2Region));
 
-        // Dynamically set level 3 button texture based on level 2 completion
         TextureRegion level3Region = new TextureRegion(
             level2Completed ? level3ButtonTexture : incompleteButtonTexture
         );
@@ -65,7 +62,6 @@ public class LevelScreen implements Screen {
 
         exitButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(exitButtonTexture)));
 
-        // Position buttons
         level1Button.setPosition(
             Gdx.graphics.getWidth() / 3f - level1Button.getWidth() / 3f - 350,
             Gdx.graphics.getHeight() / 2f - 175
@@ -86,7 +82,6 @@ public class LevelScreen implements Screen {
             Gdx.graphics.getHeight() - exitButton.getHeight() - 20
         );
 
-        // Level 1 button listener
         level1Button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -95,7 +90,6 @@ public class LevelScreen implements Screen {
             }
         });
 
-        // Level 2 button listener
         level2Button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -108,7 +102,6 @@ public class LevelScreen implements Screen {
             }
         });
 
-        // Level 3 button listener
         level3Button.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -121,7 +114,6 @@ public class LevelScreen implements Screen {
             }
         });
 
-        // Exit button listener
         exitButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -130,7 +122,6 @@ public class LevelScreen implements Screen {
             }
         });
 
-        // Add actors to stage
         stage.addActor(level1Button);
         stage.addActor(level2Button);
         stage.addActor(level3Button);

@@ -14,7 +14,6 @@ public class IceStructure extends Structure {
 
     @Override
     public boolean takeHit(Bird bird) {
-        // Ice structure is more fragile
         currentDurability -= bird.getPower();
         return isDestroyed();
     }}

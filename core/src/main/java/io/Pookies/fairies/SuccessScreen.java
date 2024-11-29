@@ -24,15 +24,17 @@ public class SuccessScreen implements Screen {
     private Stage stage;
     private SpriteBatch batch;
     private Texture successBackground;
-    private Texture pixelTexture; // For confetti particles
+    private Texture pixelTexture;
     private ImageButton exitButton;
     private ImageButton menuButton;
     private ImageButton nextLevelButton;
     private Array<ConfettiParticle> confettiParticles;
     private Random random;
+    private int currentLevel;
 
-    public SuccessScreen(Game game) {
+    public SuccessScreen(Game game, int currentLevel) {
         this.game = game;
+        this.currentLevel = currentLevel;
         confettiParticles = new Array<>();
         random = new Random();
     }
@@ -43,8 +45,6 @@ public class SuccessScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         batch = new SpriteBatch();
         successBackground = new Texture(Gdx.files.internal("successScreen.png"));
-
-        // Create a 1x1 white pixel texture for confetti
         pixelTexture = createPixelTexture();
 
         createButtons();
@@ -52,7 +52,6 @@ public class SuccessScreen implements Screen {
         stage.addActor(menuButton);
         stage.addActor(nextLevelButton);
 
-        // Spawn initial confetti
         spawnConfetti(50);
     }
 
@@ -106,7 +105,19 @@ public class SuccessScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
                 System.out.println("Next Level button clicked!");
-                game.setScreen(new LevelScreen_2(game));
+
+                switch (currentLevel) {
+                    case 1:
+                        game.setScreen(new LevelScreen_2(game));
+                        break;
+                    case 2:
+                        game.setScreen(new LevelScreen_3(game));
+                        break;
+                    // Add more levels as needed
+                    default:
+                        System.out.println("No more levels available!");
+                        break;
+                }
             }
         });
     }

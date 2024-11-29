@@ -76,6 +76,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     private boolean allBirdsExhausted = false;
     private boolean currentBirdUsed = false;
 
+
     private Bird currentBird;
     private Bird[] birds;
     private int currentBirdIndex = 0;
@@ -126,7 +127,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
         birds = new Bird[]{purpleBird, pinkBird1, pinkBird2};
         currentBirdIndex = 0;
         currentBird = birds[currentBirdIndex];
-        currentBird.setPosition(slingshotOrigin.x,slingshotOrigin.y);
+        currentBird.setPosition(slingshotOrigin.x, slingshotOrigin.y);
     }
 
     private void setupErrorHandler() {
@@ -163,7 +164,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                game.setScreen(new PauseScreen(game, (Screen)LevelScreen_2.this));
+                game.setScreen(new PauseScreen(game, (Screen) LevelScreen_2.this));
             }
         });
 
@@ -221,7 +222,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
                 levelCompleteTimer += delta;
                 if (levelCompleteTimer >= LEVEL_COMPLETE_DELAY) {
                     LevelScreen.level2Completed = true;
-                    game.setScreen(new SuccessScreen(game));
+                    game.setScreen(new SuccessScreen(game,2));
                     return;
                 }
             } else if (currentBirdIndex >= birds.length && !currentBirdUsed) {
@@ -257,7 +258,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
                     if (!LevelScreen.level2Completed) {
                         LevelScreen.level2Completed = true;
                     }
-                    game.setScreen(new SuccessScreen(game));
+                    game.setScreen(new SuccessScreen(game,2));
                     return;
                 }
             }
@@ -388,7 +389,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     private void checkLevelCompletion() {
         if (pigDestroyed1 && pigDestroyed2 && !LevelScreen.level2Completed) {
             LevelScreen.level2Completed = true;
-            game.setScreen(new SuccessScreen(game));
+            game.setScreen(new SuccessScreen(game,2));
         }
     }
 
@@ -538,7 +539,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
 
         if (pauseButtonBounds.contains(touchPos.x, touchPos.y)) {
             ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-            game.setScreen(new PauseScreen(game, (Screen)this));
+            game.setScreen(new PauseScreen(game, (Screen) this));
             return true;
         }
 
@@ -671,11 +672,30 @@ public class LevelScreen_2 implements Screen, InputProcessor {
         return withinStructureWidth && directlyAbove;
     }
 
-    @Override public boolean keyDown(int keycode) { return false; }
-    @Override public boolean keyUp(int keycode) { return false; }
-    @Override public boolean keyTyped(char character) { return false; }
-    @Override public boolean mouseMoved(int screenX, int screenY) { return false; }
-    @Override public boolean scrolled(float amountX, float amountY) { return false; }
+    @Override
+    public boolean keyDown(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char character) {
+        return false;
+    }
+
+    @Override
+    public boolean mouseMoved(int screenX, int screenY) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(float amountX, float amountY) {
+        return false;
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -683,10 +703,12 @@ public class LevelScreen_2 implements Screen, InputProcessor {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
     public void hide() {

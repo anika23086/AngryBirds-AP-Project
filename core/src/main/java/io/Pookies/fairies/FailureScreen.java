@@ -64,7 +64,7 @@ public class FailureScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
-                Gdx.app.exit(); // Exit the game
+                Gdx.app.exit();
             }
         });
 
@@ -82,7 +82,6 @@ public class FailureScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
                 System.out.println("Retrying level " + failedLevel);
-                // Use the stored level number to return to the correct level
                 switch (failedLevel) {
                     case 1:
                         game.setScreen(new LevelScreen_1(game));
@@ -93,7 +92,6 @@ public class FailureScreen implements Screen {
                     case 3:
                         game.setScreen(new LevelScreen_3(game));
                         break;
-                    // Add more cases for additional levels
                     default:
                         game.setScreen(new LevelScreen(game));
                         break;

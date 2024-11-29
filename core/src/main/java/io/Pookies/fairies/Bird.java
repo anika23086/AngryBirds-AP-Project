@@ -95,4 +95,8 @@ public abstract class Bird {
     }
 
     public abstract int getStrengthAgainst(String material);
+
+    public void setPosition(float lerp, float lerp1) {
+        this.position.set(lerp, lerp1);
+    }
 }

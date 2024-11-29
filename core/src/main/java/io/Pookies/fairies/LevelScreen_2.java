@@ -198,6 +198,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
                 }
             }
 
+            // Check for failure conditions
             if (allBirdsExhausted && !(pigDestroyed1 && pigDestroyed2)) {
                 game.setScreen(new FailureScreen(game, 2));
                 return;
@@ -278,7 +279,7 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             }
 
             if (checkingForFailure && !(pigDestroyed1 && pigDestroyed2)) {
-                checkForFailureConditions(delta);
+                checkForFailureConditions();
             }
 
             if (gameStarted && !(pigDestroyed1 && pigDestroyed2)) {
@@ -300,15 +301,24 @@ public class LevelScreen_2 implements Screen, InputProcessor {
                 checkCollisions();
             }
 
+            // Draw pause button
             batch.draw(simplePauseTexture,
                 pauseButtonBounds.x,
                 pauseButtonBounds.y,
                 pauseButtonBounds.width,
                 pauseButtonBounds.height);
 
+            // Act and draw the stage
             stage.act(delta);
             stage.draw();
 
+            // Render game elements
+            renderGameElements();
+
+            // Draw the score
+            scoreFont.draw(batch, "Score: " + currentScore, 40, Gdx.graphics.getHeight() - 115);
+
+            // Render birds and pigs
             if (!birdDestroyed) {
                 currentBird.draw(batch, 1);
             }
@@ -319,12 +329,14 @@ public class LevelScreen_2 implements Screen, InputProcessor {
                 bubblePig1.render(batch);
             }
 
+            // Render sparkle effect
             if (sparkleTimer > 0) {
                 batch.setColor(1, 1, 1, sparkleAlpha);
                 batch.draw(sparkleTexture, sparklePosition.x, sparklePosition.y, 100, 100);
                 batch.setColor(1, 1, 1, 1);
             }
 
+            // Render structures
             if (!woodStructureDestroyed) {
                 woodStructure1.render(batch);
             }
@@ -336,8 +348,6 @@ public class LevelScreen_2 implements Screen, InputProcessor {
             }
             slingshot.render(batch);
 
-            scoreFont.draw(batch, "Score: " + currentScore, 40, Gdx.graphics.getHeight() - 115);
-            renderGameElements();
             batch.end();
 
         } catch (Throwable t) {
@@ -447,29 +457,10 @@ public class LevelScreen_2 implements Screen, InputProcessor {
         }
     }
 
-    private void checkForFailureConditions(float delta) {
-        failureCheckTimer += delta;
-
-        if (failureCheckTimer >= FAILURE_CHECK_DELAY) {
-            Vector2 birdPos = currentBird.getPosition();
-            boolean isOffScreen = birdPos.x < -SCREEN_BOUNDS_MARGIN ||
-                birdPos.x > Gdx.graphics.getWidth() + SCREEN_BOUNDS_MARGIN ||
-                birdPos.y < -SCREEN_BOUNDS_MARGIN ||
-                birdPos.y > Gdx.graphics.getHeight() + SCREEN_BOUNDS_MARGIN;
-
-            Vector2 birdVelocity = currentBird.getVelocity();
-            boolean hasStopped = birdVelocity.len() < VELOCITY_THRESHOLD;
-
-            // Only show failure screen if all birds are exhausted and pigs remain
-            if ((isOffScreen || hasStopped) && currentBirdIndex >= birds.length - 1 && currentBirdUsed && !(pigDestroyed1 && pigDestroyed2)) {
-                game.setScreen(new FailureScreen(game, 2));
-            } else if ((isOffScreen || hasStopped) && !currentBirdUsed) {
-                // If current bird is off screen or stopped, prepare for next bird
-                currentBirdUsed = true;
-                prepareBirdTransition();
-            }
-
-            failureCheckTimer = 0; // Reset the timer
+    private void checkForFailureConditions() {
+        // Check if all birds have been used and if both pigs are still alive
+        if (allBirdsExhausted && !(pigDestroyed1 && pigDestroyed2)) {
+            game.setScreen(new FailureScreen(game, 2));
         }
     }
 

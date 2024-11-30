@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import java.util.Random;
 
 public class LevelScreen implements Screen {
     private final Game game;
@@ -25,6 +26,8 @@ public class LevelScreen implements Screen {
     private Texture exitButtonTexture;
     private Texture incompleteButtonTexture;
     private ImageButton level1Button, level2Button, level3Button, exitButton;
+    private ImageButton specialLevelButton;
+    private Texture specialLevelButtonTexture;
 
     public static boolean level1Completed = false;
     public static boolean level2Completed = false;
@@ -49,6 +52,37 @@ public class LevelScreen implements Screen {
         incompleteButtonTexture = new Texture(Gdx.files.internal("incompleteButton.png"));
 
         level1Button = new ImageButton(new TextureRegionDrawable(new TextureRegion(level1ButtonTexture)));
+        specialLevelButtonTexture = new Texture(Gdx.files.internal("specialLevelButton.png"));
+        specialLevelButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(specialLevelButtonTexture)));
+
+        specialLevelButton.setPosition(
+            Gdx.graphics.getWidth() / (2f+10) - specialLevelButton.getWidth() / (2f),
+            Gdx.graphics.getHeight() / 2f - 500
+        );
+
+        specialLevelButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                ((Main) game).clickSound.play(((Main) game).clickSoundVolume);
+                Random rand = new Random();
+                int randomLevel = rand.nextInt(3)+1;
+                System.out.println("Random Level Selected: " + randomLevel);
+
+                switch (randomLevel) {
+                    case 1:
+                        game.setScreen(new LevelScreen_1(game));
+                        break;
+                    case 2:
+                        game.setScreen(new LevelScreen_2(game));
+                        break;
+                    case 3:
+                        game.setScreen(new LevelScreen_3(game));
+                        break;
+                    default:
+                        System.out.println("Unexpected level: " + randomLevel);
+                }
+            }
+        });
 
         TextureRegion level2Region = new TextureRegion(
             level1Completed ? level2ButtonTexture : incompleteButtonTexture
@@ -126,6 +160,8 @@ public class LevelScreen implements Screen {
         stage.addActor(level2Button);
         stage.addActor(level3Button);
         stage.addActor(exitButton);
+        stage.addActor(specialLevelButton);
+
     }
 
     @Override
@@ -168,5 +204,6 @@ public class LevelScreen implements Screen {
         level3ButtonTexture.dispose();
         exitButtonTexture.dispose();
         incompleteButtonTexture.dispose();
+        specialLevelButtonTexture.dispose();
     }
 }

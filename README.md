@@ -33,17 +33,42 @@ Note that most tasks that are not specific to a single project can be run with `
 For example, `core:clean` removes `build` folder only from the `core` project.
 
 # HOW TO RUN THE PROGRAM
+# STATIC GUI
 To be able to run the program, open the Lwjgl3Launcher class, which can be found in the lwjgl3 folder, within src -> main -> java -> io.Pookies.fairies.lwjgl3.
-When the program will be run, the main screen will appear, where the user has to click on the 'Play' button to move to the levels screen. 
-In the levels screen, only the first level will be unlocked, which when clicked will take the user to the Level 1 screen. In that screen, 
+When the program will be run, the main screen will appear, where the user has to click on the 'Play' button to move to the levels screen.
+In the levels screen, only the first level will be unlocked, which when clicked will take the user to the Level 1 screen. In that screen,
 since the game functionalities haven't been programmed yet, the user will see 2 buttons, 'Success!' and 'Failure!', which can be clicked to view
 the success and failure screens. In the success screen menu, the user will have the option to exit the game, return to the levels screen, or directly move
-on to the next level. Based on what the user chooses, they will be directed to that respective page. Similarly, in the failure screen menu, the user will have 
+on to the next level. Based on what the user chooses, they will be directed to that respective page. Similarly, in the failure screen menu, the user will have
 the option to exit the game, return to the levels screen, or retry the level. Based on their choice, they will be directed to that screen accordingly.
-Furthermore, in all the level screens, on the top right corner there will be a pause button, which when clicked will take the user to pause menu, where the user 
-will have the choice to continue the game where they left off, restart, go back to the levels screen, or exit the game entirely. Again, based on their choice, 
+Furthermore, in all the level screens, on the top right corner there will be a pause button, which when clicked will take the user to pause menu, where the user
+will have the choice to continue the game where they left off, restart, go back to the levels screen, or exit the game entirely. Again, based on their choice,
 the user will get directed to that page. By doing this, the program can be tested and ensured that all the screens and the transitions between them through the
-use of buttons are working properly or not. 
+use of buttons are working properly or not.
+
+# FUNCTIONING GAME
+# STATIC GUI
+To be able to run the program, open the Lwjgl3Launcher class, which can be found in the lwjgl3 folder, within src -> main -> java -> io.Pookies.fairies.lwjgl3.
+When the program will be run, the main screen will appear, where the user has to click on the 'Play' button to move to the levels screen.
+In the levels screen, only the first level will be unlocked, which when clicked will take the user to the Level 1 screen. In that screen,
+since the game functionalities haven't been programmed yet, the user will see 2 buttons, 'Success!' and 'Failure!', which can be clicked to view
+the success and failure screens. In the success screen menu, the user will have the option to exit the game, return to the levels screen, or directly move
+on to the next level. Based on what the user chooses, they will be directed to that respective page. Similarly, in the failure screen menu, the user will have
+the option to exit the game, return to the levels screen, or retry the level. Based on their choice, they will be directed to that screen accordingly.
+Furthermore, in all the level screens, on the top right corner there will be a pause button, which when clicked will take the user to pause menu, where the user
+will have the choice to continue the game where they left off, restart, go back to the levels screen, or exit the game entirely. Again, based on their choice,
+the user will get directed to that page. By doing this, the program can be tested and ensured that all the screens and the transitions between them through the
+use of buttons are working properly or not.
+
+# FUNCTIONING GAME
+To be able to run the program, open the Lwjgl3Launcher class, which can be found in the lwjgl3 folder, within src -> main -> java -> io.Pookies.fairies.lwjgl3.
+When the program will be run, the main screen will appear, where the user has to click on the 'Play' button to move to the levels screen. Here the user will have
+the first level be unlocked and the remaining two levels will be locked which can only be unlocked if the previous level before it has been completed. The goal
+of the game is to kill all the pigs before all the birds available to you in that level are exhausted. Level 1 has only 1 bird who has to kill 1 pig, level 2 has
+3 birds who have to kill 2 pigs, and in level 3, there are 3 available birds who have to kill 2 pigs. Other than these 3 levels, we have added a bonus component
+called the special level. Here the user can play any randomly chosen level, hence enabling infinite gameplay. Furthermore, the pause, success, and failure screens
+will also appear based on whether the user wins or loses the game, and the pause screen will appear whenever the user presses the pause button. The user also has
+the option to exit the game whenever they want by pressing the exit button. 
 
 # ONLINE REFERENCES
 https://angrybirds.fandom.com/wiki/Stone
